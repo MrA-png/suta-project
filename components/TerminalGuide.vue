@@ -22,7 +22,7 @@
       <div class="flex gap-5 relative">
         <div class="w-[2px] bg-suta-cyan shadow-cyan-glow rounded-[2px]"></div>
         <div class="flex-1">
-          <div class="text-[18px] leading-snug text-white whitespace-pre-wrap font-mono">
+          <div class="text-[14px] leading-snug text-white whitespace-pre-wrap font-mono">
             {{ displayedText }}<span class="inline-block w-[2px] h-[1em] bg-suta-cyan ml-1 align-middle animate-pulse"></span>
           </div>
         </div>
@@ -30,6 +30,7 @@
       
       <div class="mt-8 flex justify-end">
         <button 
+          @click="showDocs = true"
           class="flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-md text-suta-muted text-[10px] font-medium tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 uppercase"
         >
           <div class="w-3 h-3 bg-current [mask-image:url(/icons/info.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
@@ -37,15 +38,18 @@
         </button>
       </div>
     </div>
+
+    <!-- Full Documentation Modal -->
+    <TerminalDocsModal :show="showDocs" @close="showDocs = false" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useSuta } from '~/composables/useSuta'
 
 const { currentStatus } = useSuta()
 const isOpen = ref(true)
+const showDocs = ref(false)
 const fullText = "Welcome to Suta.\n\nTo begin:\n1. Click 'Change Source'.\n2. Select your Meet/Zoom tab.\n3. Enable 'Share tab audio'.\n\nSuta will start assisting instantly."
 const displayedText = ref('')
 

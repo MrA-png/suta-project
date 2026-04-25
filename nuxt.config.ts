@@ -4,7 +4,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-04-25',
   runtimeConfig: {
     public: {
-      deepgramApiKey: process.env.DEEPGRAM_API_KEY
+      deepgramApiKey: process.env.DEEPGRAM_API_KEY,
+      geminiApiKey: process.env.GEMINI_API_KEY,
+      openrouterApiKey: process.env.OPENROUTER_API_KEY
     }
   },
   modules: [

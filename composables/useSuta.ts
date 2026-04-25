@@ -20,6 +20,15 @@ export interface SutaSettings {
   isTranslatorEnabled: boolean;
 }
 
+export interface Personality {
+  identity: {
+    full_name: string;
+    nickname: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
 export const useSuta = () => {
   const transcript = useState<TranscriptMessage[]>('suta-transcript', () => [
     { speaker: 'System', text: 'Suta Terminal Initialized. Ready for session capture.', isFinal: true }
@@ -37,16 +46,39 @@ export const useSuta = () => {
     isTranslatorEnabled: true
   }))
 
+  const personality = useState<Personality | null>('suta-personality', () => null)
+
   // Persistence Logic
-  onMounted(() => {
+  onMounted(async () => {
+    // Load History
     const savedHistory = localStorage.getItem('suta_history')
     if (savedHistory) {
       history.value = JSON.parse(savedHistory)
+    }
+
+    // Load Personality
+    const savedPersonality = localStorage.getItem('suta_personality')
+    if (savedPersonality) {
+      personality.value = JSON.parse(savedPersonality)
+    } else {
+      // Load default from assets
+      try {
+        const defaultPersonality = await import('~/assets/personality.json')
+        personality.value = defaultPersonality.default
+      } catch (e) {
+        console.error('Failed to load default personality:', e)
+      }
     }
   })
 
   watch(history, (newVal) => {
     localStorage.setItem('suta_history', JSON.stringify(newVal))
+  }, { deep: true })
+
+  watch(personality, (newVal) => {
+    if (newVal) {
+      localStorage.setItem('suta_personality', JSON.stringify(newVal))
+    }
   }, { deep: true })
   
   const addMessage = (speaker: string, text: string, translation?: string, isFinal: boolean = true) => {
@@ -99,6 +131,7 @@ export const useSuta = () => {
     currentStatus, 
     settings,
     history,
+    personality,
     isAIPanelOpen,
     addMessage, 
     setInterim,

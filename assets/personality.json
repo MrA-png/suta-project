@@ -1,0 +1,231 @@
+{
+  "_comment": "This profile is used as personality context and background for SUTA Secret Whisperer. Fill all fields according to your real data.",
+
+  "identity": {
+    "full_name": "Alex Rivera",
+    "nickname": "Alex",
+    "gender": "Non-binary",
+    "date_of_birth": "1995-05-20",
+    "location": {
+      "city": "Digital City",
+      "province": "Tech District",
+      "country": "Cloudland",
+      "willing_to_relocate": true,
+      "open_to_remote": true
+    },
+    "contact": {
+      "email": "alex.rivera@dummy.io",
+      "phone": "+1234567890",
+      "linkedin": "https://www.linkedin.com/in/alex-rivera-dummy",
+      "github": "https://github.com/alex-rivera-dummy",
+      "portfolio": "https://alex-rivera.dev"
+    }
+  },
+
+  "headline": {
+    "title": "Senior Fullstack Engineer & System Architect",
+    "motto": "Simplicity is the soul of efficiency.",
+    "tagline": "Specialized in building high-concurrency systems and pixel-perfect user interfaces.",
+    "open_to_work": true,
+    "availability": "Two weeks notice",
+    "preferred_work_type": ["Full-time", "Remote", "Hybrid"],
+    "tech_stack": [
+      "Next.js",
+      "TypeScript",
+      "Go",
+      "Rust",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes",
+      "AWS",
+      "Tailwind CSS",
+      "GraphQL",
+      "Redis",
+      "Terraform"
+    ]
+  },
+
+  "summary": "Results-oriented Software Engineer with over 8 years of experience. Expert in architecting scalable distributed systems and crafting intuitive, high-performance web applications. Proven track record in leading engineering teams and delivering complex products from ideation to production.",
+
+  "experience": [
+    {
+      "title": "Lead Software Engineer",
+      "company": "TechNova Solutions",
+      "location": "Remote",
+      "start_date": "2021-01",
+      "end_date": "Present",
+      "is_current": true,
+      "description": "Leading the core platform team responsible for a multi-tenant SaaS infrastructure.",
+      "projects": [
+        {
+          "name": "NovaCore",
+          "description": "High-performance microservices engine handling 10k+ requests per second.",
+          "tech_stack": ["Go", "gRPC", "Redis", "Kafka"],
+          "url": "https://github.com/alex-rivera-dummy/novacore"
+        }
+      ],
+      "achievements": [
+        "Architected a horizontal scaling strategy that reduced infrastructure costs by 30%.",
+        "Established company-wide engineering standards for API design and documentation.",
+        "Mentored 5 junior developers who were later promoted to mid-level roles."
+      ]
+    },
+    {
+      "title": "Senior Frontend Developer",
+      "company": "PixelPerfect Agency",
+      "location": "Hybrid",
+      "start_date": "2018-06",
+      "end_date": "2020-12",
+      "is_current": false,
+      "description": "Specialized in building responsive, accessible, and highly interactive user interfaces for Fortune 500 clients.",
+      "projects": [
+        {
+          "name": "Aurora UI",
+          "description": "A comprehensive design system and component library focused on accessibility and performance.",
+          "tech_stack": ["React", "Storybook", "Framer Motion", "Styled Components"]
+        }
+      ],
+      "achievements": [
+        "Led the migration from a monolithic legacy frontend to a modern Next.js micro-frontend architecture.",
+        "Improved the average Core Web Vitals score by 40% across client applications."
+      ]
+    }
+  ],
+
+  "education": [
+    {
+      "degree": "Master of Computer Science",
+      "institution": "Global Tech University",
+      "city": "Digital City",
+      "start_year": 2015,
+      "end_year": 2017,
+      "gpa": 3.9,
+      "max_gpa": 4.0,
+      "relevant_courses": [
+        "Advanced Algorithms",
+        "Distributed Systems",
+        "Machine Learning",
+        "Cloud Architecture"
+      ]
+    },
+    {
+      "degree": "Bachelor of Software Engineering",
+      "institution": "Institute of Technology",
+      "city": "Cyber Hub",
+      "start_year": 2011,
+      "end_year": 2015,
+      "gpa": 3.85,
+      "max_gpa": 4.0,
+      "relevant_courses": [
+        "Data Structures",
+        "Operating Systems",
+        "Web Development Fundamentals",
+        "Database Design"
+      ],
+      "thesis": {
+        "title": "Optimizing P2P Networks for Scalable Data Distribution",
+        "url": "https://example.com/thesis-alex-rivera"
+      }
+    }
+  ],
+
+  "skills": {
+    "primary": {
+      "Frontend": ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+      "Backend": ["Go", "Node.js", "Rust", "PostgreSQL"],
+      "DevOps": ["Docker", "Kubernetes", "Terraform", "AWS", "CI/CD"]
+    },
+    "secondary": {
+      "Testing": ["Jest", "Cypress", "Playwright"],
+      "Databases": ["Redis", "Elasticsearch", "MongoDB"],
+      "Tools": ["Git", "Postman", "Figma", "Jira"]
+    },
+    "soft_skills": [
+      "Technical Leadership",
+      "Effective Cross-functional Communication",
+      "Strategic Roadmap Planning",
+      "Agile/Scrum Methodology",
+      "Rapid Problem Solving"
+    ]
+  },
+
+  "projects": [
+    {
+      "name": "Nebula Cloud CLI",
+      "type": "Open Source Tool",
+      "description": "A lightweight CLI tool built in Rust for managing multi-cloud resource deployments.",
+      "tech_stack": ["Rust", "Tokio", "Clap"],
+      "highlights": [
+        "Used by 500+ developers worldwide.",
+        "Featured on the front page of Hacker News."
+      ],
+      "url": "https://github.com/alex-rivera-dummy/nebula-cli"
+    }
+  ],
+
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect – Professional",
+      "issuer": "Amazon Web Services",
+      "year": 2022
+    },
+    {
+      "name": "Google Professional Cloud Developer",
+      "issuer": "Google Cloud",
+      "year": 2021
+    }
+  ],
+
+  "languages": [
+    {
+      "language": "English",
+      "level": "Native"
+    },
+    {
+      "language": "Indonesian",
+      "level": "Full Professional Proficiency"
+    },
+    {
+      "language": "Japanese",
+      "level": "Limited Working Proficiency"
+    }
+  ],
+
+  "preferences": {
+    "desired_roles": ["CTO", "Engineering Manager", "Staff Engineer"],
+    "desired_industries": ["Fintech", "AI & Machine Learning", "Cloud Infrastructure"],
+    "expected_salary_range": {
+      "currency": "USD",
+      "min": 150000,
+      "max": 200000
+    },
+    "values_in_workplace": [
+      "Engineering excellence and clean code",
+      "Radical transparency",
+      "Continuous learning and growth",
+      "Work-life harmony"
+    ]
+  },
+
+  "interview_context": {
+    "strengths": [
+      "Architecting complex distributed systems from scratch",
+      "Optimizing performance at scale (both FE and BE)",
+      "Building and leading high-performing engineering cultures"
+    ],
+    "weaknesses_and_growth": [
+      "Deepening expertise in high-frequency trading systems",
+      "Expanding knowledge in decentralized finance (DeFi) protocols"
+    ],
+    "common_interview_answers": {
+      "tell_me_about_yourself": "I am a Staff Engineer with a T-shaped skill set. While my roots are in high-performance backend systems, I've spent years mastering the art of the frontend to ensure that the systems I build aren't just powerful, but also intuitive and accessible.",
+      "career_goals": "In the next 5 years, I aim to lead the engineering department of a world-changing technology company, driving innovation while fostering a culture of excellence and mentorship.",
+      "biggest_achievement": "Architecting and scaling TechNova's core platform to handle a 10x increase in traffic without a single minute of downtime. It was a true test of both technical strategy and team coordination.",
+      "handling_conflict": "I believe in radical transparency. When conflicts arise, I address them immediately with data and empathy, focusing on what's best for the product and the team's long-term health."
+    },
+    "interview_philosophy": {
+      "be_honest_about_gaps": true,
+      "handling_unknowns": "When faced with an unknown technical challenge, I walk the interviewer through my first-principles thinking process to demonstrate how I would systematically decompose and solve the problem."
+    }
+  }
+}

@@ -48,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import { useSuta } from '~/composables/useSuta'
 
 defineProps<{ show: boolean }>()
 defineEmits(['close'])

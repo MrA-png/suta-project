@@ -3,20 +3,21 @@
     <!-- Header -->
     <header class="h-[64px] px-6 flex items-center justify-between border-b border-suta-border flex-shrink-0">
       <div class="brand">
-        <h1 class="text-[20px] font-extrabold tracking-tight">
+        <h1 class="text-[20px] font-extrabold tracking-tight text-white">
           Suta<span class="text-suta-cyan">.</span>
         </h1>
       </div>
       
-      <div class="flex items-center gap-2">
-        <!-- AI Help Button -->
+      <div class="flex items-center gap-2" ref="headerRef">
+        <!-- AI Panel Toggle -->
         <button 
-          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 text-suta-cyan hover:bg-suta-cyan hover:text-black transition-all group"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all group overflow-hidden"
+          :class="isAIPanelOpen ? 'bg-suta-cyan text-black' : 'bg-suta-cyan/10 border border-suta-cyan/20 text-suta-cyan hover:bg-suta-cyan hover:text-black'"
           @click="isAIPanelOpen = !isAIPanelOpen"
-          title="AI Assistant"
+          title="Toggle AI Secret Whisperer"
         >
-          <div class="w-4 h-4 bg-current [mask-image:url(/icons/ai.svg)] [mask-size:contain] [mask-repeat:no-repeat] animate-pulse"></div>
-          <span class="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">AI Help</span>
+          <div class="w-4 h-4 bg-current [mask-image:url(/icons/ai.svg)] [mask-size:contain] [mask-repeat:no-repeat]" :class="{ 'animate-pulse': isListening }"></div>
+          <span v-if="headerWidth > 280" class="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">AI Help</span>
         </button>
 
         <div class="w-[1px] h-4 bg-white/10 mx-1"></div>
@@ -42,10 +43,10 @@
     </header>
 
     <!-- Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden relative group/content">
-      <!-- Floating Clear Button -->
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+      <!-- Floating Reset Button -->
       <button 
-        v-if="transcript.length > 0 && (status === 'listening' || status === 'processing')"
+        v-if="transcript.length > 1"
         @click="showResetConfirm = true"
         class="absolute top-4 right-6 z-20 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/20 rounded-md text-[10px] font-bold tracking-widest text-suta-muted hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10 transition-all duration-300 flex items-center gap-2 uppercase"
       >
@@ -82,7 +83,6 @@
     <!-- Modals -->
     <TerminalHistoryModal :show="showHistory" @close="showHistory = false" />
     <TerminalSettingsModal :show="showSettings" @close="showSettings = false" />
-    <TerminalAIModal :show="showAI" @close="showAI = false" />
 
     <!-- Reset Confirmation Dialog -->
     <BaseConfirmation 
@@ -99,15 +99,36 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useSuta } from '~/composables/useSuta'
 
-const { transcript, interimText, currentStatus: status, settings, isAIPanelOpen, clearTranscript } = useSuta()
+const { transcript, interimText, currentStatus: status, isListening, settings, isAIPanelOpen, clearTranscript } = useSuta()
 
 const showSettings = ref(false)
 const showHistory = ref(false)
 const showResetConfirm = ref(false)
 const transcriptionRef = ref(null)
+const headerRef = ref(null)
+const headerWidth = ref(0)
+
+let resizeObserver = null
+
+onMounted(() => {
+  if (headerRef.value) {
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        headerWidth.value = entry.contentRect.width
+      }
+    })
+    resizeObserver.observe(headerRef.value.parentElement)
+  }
+})
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
+})
 
 const handleReset = () => {
   clearTranscript(true)
@@ -128,10 +149,7 @@ watch(interimText, (newText) => {
 
 <style scoped>
 .terminal-content-area {
-  scroll-behavior: auto !important;
-  -webkit-overflow-scrolling: touch;
-  contain: strict;
-  will-change: scroll-position;
+  scroll-behavior: smooth;
 }
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }

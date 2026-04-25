@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :show="show" :title="title" @close="$emit('cancel')">
+  <BaseModal :show="show" :title="title" :danger="danger" @close="$emit('cancel')">
     <div class="py-4 text-center">
       <p class="text-[14px] text-white/70 mb-2">{{ message }}</p>
       <p v-if="subMessage" class="text-[11px] font-bold uppercase tracking-widest italic" :class="danger ? 'text-red-400' : 'text-suta-cyan'">
