@@ -42,7 +42,7 @@
       </div>
 
     <!-- Personality Modal -->
-    <TerminalPersonalityModal 
+    <WorkspaceModalsPersonality 
       :show="isPersonalityModalOpen" 
       @close="isPersonalityModalOpen = false" 
     />
@@ -98,9 +98,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRuntimeConfig, useSuta } from '#imports'
+import { useSuta } from '../../composables/useSuta'
 
-const config = useRuntimeConfig()
+// Explicitly extracting public config for the AI Unit
+const { public: config } = useRuntimeConfig()
 const { transcript, isAIPanelOpen, settings, personality } = useSuta()
 const isAnalyzing = ref(false)
 const isPersonalityModalOpen = ref(false)
@@ -143,8 +144,8 @@ OUTPUT STRUCTURE:
 })
 
 const performAIAnalysis = async () => {
-  const geminiKey = config.public.geminiApiKey
-  const openRouterKey = config.public.openrouterApiKey
+  const geminiKey = config.geminiApiKey
+  const openRouterKey = config.openrouterApiKey
 
   if (transcript.value.length < 1) {
     analysisResult.value = "### STATUS: WAITING_FOR_FLUX\nI'm monitoring the conversation. I'll whisper as soon as the first words are spoken."

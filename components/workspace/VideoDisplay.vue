@@ -1,42 +1,7 @@
 <template>
-  <div 
-    class="relative w-full h-full bg-black flex items-center justify-center overflow-hidden"
-    :class="{ 'cursor-none': !isStreaming }"
-    @mousemove="handleMouseMove"
-    @mouseenter="isHovering = true"
-    @mouseleave="isHovering = false"
-  >
+  <div class="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
     <!-- Custom ASCII Glitch Cursor (Only Offline) -->
-    <div 
-      v-if="!isStreaming && isHovering"
-      class="pointer-events-none fixed z-[50] mix-blend-difference font-mono text-[10px] text-suta-cyan transition-opacity duration-300"
-      :style="{ left: mouseX + 'px', top: mouseY + 'px' }"
-    >
-      <div class="relative -translate-x-1/2 -translate-y-1/2">
-        <!-- Crosshair -->
-        <div class="absolute inset-0 flex items-center justify-center">
-          <div class="w-6 h-[1px] bg-suta-cyan/40"></div>
-          <div class="h-6 w-[1px] bg-suta-cyan/40 absolute"></div>
-        </div>
-        
-        <!-- ASCII Glitch Data -->
-        <div class="ml-6 mt-6 whitespace-nowrap bg-black/40 backdrop-blur-[4px] p-2 border-l-2 border-suta-cyan/60 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
-          <div class="flex flex-col gap-0.5">
-            <div class="flex items-center gap-2">
-              <span class="leading-none opacity-40 text-[8px]">SEARCHING_FRQ:</span>
-              <span class="leading-none font-bold text-white">{{ noiseString }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="leading-none opacity-40 text-[8px]">COORD:</span>
-              <span class="leading-none font-bold">[ {{ Math.round(mouseX) }} : {{ Math.round(mouseY) }} ]</span>
-            </div>
-            <div class="mt-1 text-[7px] text-suta-cyan/60 flex gap-1">
-              <span v-for="i in 3" :key="i" class="animate-pulse">{{ glitchChar }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <GlitchCursor v-if="!isStreaming" />
 
     <!-- Real Video Stream -->
     <video 
@@ -87,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 
 defineProps<{
   isStreaming: boolean
@@ -95,36 +60,6 @@ defineProps<{
 }>()
 
 const videoRef = ref<HTMLVideoElement | null>(null)
-const mouseX = ref(0)
-const mouseY = ref(0)
-const isHovering = ref(false)
-const noiseString = ref('----')
-const glitchChar = ref('Δ')
-
-const chars = '@#$%&*§ΔΩΣΘΞΨΠΦΓΛ0123456789'
-let interval: any = null
-
-const generateNoise = () => {
-  let result = ''
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  noiseString.value = result
-  glitchChar.value = chars.charAt(Math.floor(Math.random() * chars.length))
-}
-
-const handleMouseMove = (e: MouseEvent) => {
-  mouseX.value = e.clientX
-  mouseY.value = e.clientY
-}
-
-onMounted(() => {
-  interval = setInterval(generateNoise, 100)
-})
-
-onUnmounted(() => {
-  if (interval) clearInterval(interval)
-})
 
 // Expose the video element to the parent
 defineExpose({ videoElement: videoRef })

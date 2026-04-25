@@ -56,7 +56,7 @@
 
       <div class="flex-1 p-6 overflow-y-auto terminal-content-area custom-scrollbar" ref="transcriptionRef">
         <!-- Message History -->
-        <TerminalMessage 
+        <WorkspaceMessage 
           v-for="(msg, index) in transcript" 
           :key="index"
           :speaker="msg.speaker"
@@ -77,15 +77,15 @@
       </div>
 
       <!-- Quick Start Guide -->
-      <TerminalGuide />
+      <WorkspaceGuide />
     </div>
 
     <!-- Modals -->
-    <TerminalHistoryModal :show="showHistory" @close="showHistory = false" />
-    <TerminalSettingsModal :show="showSettings" @close="showSettings = false" />
+    <WorkspaceModalsHistory :show="showHistory" @close="showHistory = false" />
+    <WorkspaceModalsSettings :show="showSettings" @close="showSettings = false" />
 
     <!-- Reset Confirmation Dialog -->
-    <BaseConfirmation 
+    <UiBaseConfirmation 
       :show="showResetConfirm"
       title="END SESSION?"
       message="Are you sure you want to clear the terminal?"
@@ -100,7 +100,7 @@
 
 <script setup>
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { useSuta } from '~/composables/useSuta'
+import { useSuta } from '../../composables/useSuta'
 
 const { transcript, interimText, currentStatus: status, isListening, settings, isAIPanelOpen, clearTranscript } = useSuta()
 

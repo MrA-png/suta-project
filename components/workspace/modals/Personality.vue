@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :show="show" title="NEURAL_PROFILE_EDITOR" wide @close="$emit('close')">
+  <UiBaseModal :show="show" title="NEURAL_PROFILE_EDITOR" wide @close="$emit('close')">
     <div class="space-y-4 py-2">
       <div class="flex items-center justify-between">
         <label class="text-[10px] font-bold text-suta-muted uppercase tracking-widest">JSON Configuration</label>
@@ -33,10 +33,10 @@
         </button>
       </div>
     </div>
-  </BaseModal>
+  </UiBaseModal>
 
   <!-- Reset Confirmation -->
-  <BaseConfirmation 
+  <UiBaseConfirmation 
     :show="showResetConfirm"
     title="RESET NEURAL PROFILE?"
     message="This will overwrite your current profile with the default dummy data."
@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useSuta } from '../composables/useSuta'
+import { useSuta } from '../../../composables/useSuta'
 
 const props = defineProps<{ show: boolean }>()
 const emit = defineEmits(['close'])
@@ -92,7 +92,7 @@ const resetToDefault = () => {
 
 const handleConfirmReset = async () => {
   try {
-    const defaultPersonality = await import('../assets/personality.json')
+    const defaultPersonality = await import('../../../assets/personality.json')
     jsonContent.value = JSON.stringify(defaultPersonality.default, null, 2)
     error.value = ''
     showResetConfirm.value = false

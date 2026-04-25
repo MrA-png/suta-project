@@ -6,7 +6,7 @@
     >
       <!-- Video Area -->
       <section class="relative overflow-hidden">
-        <VideoWorkspace />
+        <WorkspaceWorkspaceContainer />
       </section>
 
       <!-- Resizer (Vertical) -->
@@ -25,7 +25,7 @@
 
       <!-- Terminal Area -->
       <section class="bg-suta-dark-gray overflow-hidden">
-        <SutaTerminal />
+        <WorkspaceWorkspaceTerminalUnit />
       </section>
     </div>
   </div>

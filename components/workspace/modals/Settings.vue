@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :show="show" title="SYSTEM SETTINGS" @close="$emit('close')">
+  <UiBaseModal :show="show" title="SYSTEM SETTINGS" @close="$emit('close')">
     <div class="space-y-6 py-2">
       <!-- Language Selection -->
       <div class="space-y-3">
@@ -44,11 +44,11 @@
         Save Configuration
       </button>
     </template>
-  </BaseModal>
+  </UiBaseModal>
 </template>
 
 <script setup lang="ts">
-import { useSuta } from '../composables/useSuta'
+import { useSuta } from '../../../composables/useSuta'
 
 defineProps<{ show: boolean }>()
 defineEmits(['close'])

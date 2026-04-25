@@ -1,6 +1,6 @@
 <template>
   <div>
-    <BaseModal 
+    <UiBaseModal 
       :show="show" 
       :title="viewingSession ? 'SESSION DETAILS' : 'TRANSCRIPTION HISTORY'" 
       @close="$emit('close')"
@@ -17,7 +17,7 @@
         </div>
         
         <!-- Sessions -->
-        <HistorySessionCard 
+        <WorkspaceHistoryCard 
           v-for="session in history" 
           :key="session.id"
           :timestamp="session.timestamp"
@@ -58,10 +58,10 @@
           Close History
         </button>
       </template>
-    </BaseModal>
+    </UiBaseModal>
 
     <!-- Confirmation Dialog -->
-    <BaseConfirmation 
+    <UiBaseConfirmation 
       :show="!!pendingDeleteId"
       title="CONFIRM DELETE"
       message="Are you sure you want to delete this session?"
@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useSuta } from '~/composables/useSuta'
+import { useSuta } from '../../../composables/useSuta'
 
 defineProps<{ show: boolean }>()
 defineEmits(['close'])

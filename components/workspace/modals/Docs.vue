@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :show="show" title="CORE_DOCUMENTATION" wide @close="$emit('close')">
+  <UiBaseModal :show="show" title="CORE_DOCUMENTATION" wide @close="$emit('close')">
     <div class="space-y-8 py-2 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar text-left">
       <!-- Section: Overview -->
       <section>
@@ -77,7 +77,7 @@
         Acknowledge & Close
       </button>
     </template>
-  </BaseModal>
+  </UiBaseModal>
 </template>
 
 <script setup lang="ts">

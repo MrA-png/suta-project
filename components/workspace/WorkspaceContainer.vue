@@ -2,14 +2,14 @@
   <div class="flex flex-col w-full h-full bg-black select-none">
     <!-- Main Display Area -->
     <div class="relative flex-1 min-h-0">
-      <VideoDisplay 
+      <WorkspaceVideoDisplay 
         ref="displayRef"
         :is-streaming="isStreaming" 
         :source-name="sourceName" 
       />
 
       <!-- Controls Overlay -->
-      <VideoControls 
+      <WorkspaceVideoControls 
         :is-streaming="isStreaming"
         @start="startCapture"
         @stop="stopCapture"
@@ -37,21 +37,22 @@
       :style="{ height: aiPanelHeight + 'px' }"
       class="flex-shrink-0 border-t border-white/5 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20 overflow-hidden"
     >
-      <TerminalAIPanel />
+      <WorkspaceWorkspaceAIPanelUnit />
     </div>
 
     <!-- Status Modal -->
-    <BaseModal :show="showModal" title="SYSTEM STATUS" @close="showModal = false">
+    <UiBaseModal :show="showModal" title="SYSTEM STATUS" @close="showModal = false">
       <p class="whitespace-pre-wrap text-[13px] text-white/80 leading-relaxed">{{ modalMessage }}</p>
-    </BaseModal>
+    </UiBaseModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onUnmounted, watch } from 'vue'
-import { useSuta } from '~/composables/useSuta'
+import { useSuta } from '../../composables/useSuta'
 
-const config = useRuntimeConfig()
+// IDE_SYNC: Forcing refresh of module resolution
+const { public: config } = useRuntimeConfig()
 const { settings, currentStatus, isListening, transcript, isAIPanelOpen, addMessage, setInterim, updateLastMessageTranslation, clearTranscript } = useSuta()
 
 const displayRef = ref<any>(null)
@@ -94,6 +95,11 @@ let sourceNode: MediaStreamAudioSourceNode | null = null
 let workletNode: AudioWorkletNode | null = null
 let socket: WebSocket | null = null
 let keepAliveTimer: any = null
+export interface TranscriptionMessage {
+  speaker: string
+  text: string
+  translation?: string
+}
 
 // --- Translation Logic ---
 const translate = async (text: string, langPair: string): Promise<string> => {
@@ -131,7 +137,7 @@ registerProcessor('suta-audio-processor', SutaAudioProcessor);
 `;
 
 const initDeepgram = async (stream: MediaStream) => {
-  const apiKey = config.public.deepgramApiKey
+  const apiKey = config.deepgramApiKey
   if (!apiKey || !stream.getAudioTracks()[0]) return
 
   currentStatus.value = 'connecting'
