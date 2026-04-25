@@ -67,7 +67,9 @@ export const useSuta = () => {
       }
       history.value = [newSession, ...history.value]
     }
-    transcript.value = []
+    transcript.value = [
+      { speaker: 'System', text: 'Suta Terminal Initialized. Ready for session capture.', isFinal: true }
+    ]
     interimText.value = ''
   }
 

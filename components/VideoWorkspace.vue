@@ -26,7 +26,7 @@ import { ref, onUnmounted, watch } from 'vue'
 import { useSuta } from '~/composables/useSuta'
 
 const config = useRuntimeConfig()
-const { settings, currentStatus, isListening, addMessage, setInterim, updateLastMessageTranslation } = useSuta()
+const { settings, currentStatus, isListening, transcript, addMessage, setInterim, updateLastMessageTranslation, clearTranscript } = useSuta()
 
 const displayRef = ref<any>(null)
 const isStreaming = ref(false)
@@ -207,6 +207,11 @@ const stopDeepgram = () => {
 const stopCapture = () => {
   console.log("Initiating complete hardware shutdown...")
   
+  // Auto-archive current session before clearing
+  if (transcript.value.length > 0 && transcript.value[0].speaker !== 'System') {
+    clearTranscript(true)
+  }
+
   // 1. Stop audio processing first
   stopDeepgram()
   

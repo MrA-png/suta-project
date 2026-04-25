@@ -9,7 +9,6 @@
       </div>
       
       <div class="flex items-center gap-2">
-        <!-- History Button -->
         <button 
           class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-suta-muted hover:text-suta-cyan transition-all"
           @click="showHistory = true"
@@ -18,7 +17,6 @@
           <div class="w-5 h-5 bg-current [mask-image:url(/icons/archive-svgrepo-com.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
         </button>
 
-        <!-- Settings Button -->
         <button 
           class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-suta-muted hover:text-suta-cyan transition-all"
           @click="showSettings = true"
@@ -34,7 +32,7 @@
       <!-- Floating Clear Button -->
       <button 
         v-if="transcript.length > 0 && (status === 'listening' || status === 'processing')"
-        @click="clearTranscript(true)"
+        @click="showResetConfirm = true"
         class="absolute top-4 right-6 z-20 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/20 rounded-md text-[10px] font-bold tracking-widest text-suta-muted hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10 transition-all duration-300 flex items-center gap-2 uppercase"
       >
         <div class="w-3.5 h-3.5 bg-current [mask-image:url(/icons/clear.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
@@ -70,6 +68,18 @@
     <!-- Modals -->
     <TerminalHistoryModal :show="showHistory" @close="showHistory = false" />
     <TerminalSettingsModal :show="showSettings" @close="showSettings = false" />
+
+    <!-- Reset Confirmation Dialog -->
+    <BaseConfirmation 
+      :show="showResetConfirm"
+      title="END SESSION?"
+      message="Are you sure you want to clear the terminal?"
+      sub-message="Current transcript will be archived to history."
+      confirm-text="Reset Now"
+      danger
+      @cancel="showResetConfirm = false"
+      @confirm="handleReset"
+    />
   </div>
 </template>
 
@@ -81,7 +91,13 @@ const { transcript, interimText, currentStatus: status, settings, clearTranscrip
 
 const showSettings = ref(false)
 const showHistory = ref(false)
+const showResetConfirm = ref(false)
 const transcriptionRef = ref(null)
+
+const handleReset = () => {
+  clearTranscript(true)
+  showResetConfirm.value = false
+}
 
 const scrollToBottom = () => {
   if (transcriptionRef.value) {
