@@ -1,65 +1,48 @@
 <template>
-  <div class="h-screen w-screen bg-suta-black flex overflow-hidden font-sans text-white">
-    <div 
-      class="grid w-full h-full" 
-      :style="{ gridTemplateColumns: `${splitPercentage}% 1px auto` }"
-    >
-      <!-- Video Area -->
-      <section class="relative overflow-hidden">
-        <VideoWorkspace />
-      </section>
-
-      <!-- Resizer (Vertical) -->
-      <div 
-        class="w-[10px] ml-[-5px] cursor-col-resize z-10 flex items-center justify-center transition-all duration-300 group relative"
-        @mousedown="startResizing"
-      >
-        <!-- The Line -->
-        <div class="w-[2px] h-full bg-white/10 group-hover:bg-suta-cyan/40 transition-colors"></div>
-        
-        <!-- The Grip Dots (Vertical) -->
-        <div class="absolute top-1/2 -translate-y-1/2 py-4 bg-suta-black flex flex-col gap-1.5 items-center z-20">
-          <div v-for="i in 3" :key="i" class="w-[3px] h-[3px] rounded-full bg-white/10 group-hover:bg-suta-cyan/60 transition-colors"></div>
-        </div>
-      </div>
-
-      <!-- Terminal Area -->
-      <section class="bg-suta-dark-gray overflow-hidden">
-        <SutaTerminal />
-      </section>
-    </div>
+  <div class="min-h-screen bg-suta-black text-white font-sans selection:bg-suta-cyan selection:text-black">
+    <NuxtPage />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-
-const splitPercentage = ref(65)
-const isResizing = ref(false)
-
-const startResizing = (e) => {
-  isResizing.value = true
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('mouseup', stopResizing)
-  document.body.style.cursor = 'col-resize'
-}
-
-const handleMouseMove = (e) => {
-  if (!isResizing.value) return
-  const newPercentage = (e.clientX / window.innerWidth) * 100
-  if (newPercentage > 20 && newPercentage < 80) {
-    splitPercentage.value = newPercentage
-  }
-}
-
-const stopResizing = () => {
-  isResizing.value = false
-  document.removeEventListener('mousemove', handleMouseMove)
-  document.removeEventListener('mouseup', stopResizing)
-  document.body.style.cursor = 'default'
-}
+// Global app logic if any
 </script>
 
 <style>
-/* Global styles stay in main.css but we can remove app-specific scoped styles */
+/* Global Layout Reset */
+html {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+body {
+  min-height: 100%;
+  background-color: #050505;
+}
+
+/* Global Transitions */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s ease;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  filter: blur(1rem);
+  transform: translateY(10px);
+}
+
+/* Custom Scrollbar Global */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a2a2a;
+}
 </style>

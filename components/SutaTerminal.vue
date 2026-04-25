@@ -2,11 +2,11 @@
   <div class="flex flex-col h-full bg-suta-dark-gray text-white font-sans overflow-hidden">
     <!-- Header -->
     <header class="h-[64px] px-6 flex items-center justify-between border-b border-suta-border flex-shrink-0">
-      <div class="brand">
-        <h1 class="text-[20px] font-extrabold tracking-tight text-white">
+      <NuxtLink to="/" class="brand group flex items-center gap-2">
+        <h1 class="text-[20px] font-extrabold tracking-tight text-white group-hover:text-suta-cyan transition-colors">
           Suta<span class="text-suta-cyan">.</span>
         </h1>
-      </div>
+      </NuxtLink>
       
       <div class="flex items-center gap-2" ref="headerRef">
         <!-- AI Panel Toggle -->

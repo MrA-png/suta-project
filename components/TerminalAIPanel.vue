@@ -98,7 +98,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useSuta } from '~/composables/useSuta'
+import { useRuntimeConfig, useSuta } from '#imports'
 
 const config = useRuntimeConfig()
 const { transcript, isAIPanelOpen, settings, personality } = useSuta()
@@ -155,7 +155,7 @@ const performAIAnalysis = async () => {
   analysisResult.value = ''
 
   try {
-    const currentContext = transcript.value.map(m => `[${m.speaker}]: ${m.text}`).join('\n')
+    const currentContext = transcript.value.map((m: any) => `[${m.speaker}]: ${m.text}`).join('\n')
     
     let endpoint = ''
     let headers: any = { 'Content-Type': 'application/json' }

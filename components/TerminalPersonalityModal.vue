@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useSuta } from '../composables/useSuta'
 
 const props = defineProps<{ show: boolean }>()
 const emit = defineEmits(['close'])
@@ -91,7 +92,7 @@ const resetToDefault = () => {
 
 const handleConfirmReset = async () => {
   try {
-    const defaultPersonality = await import('~/assets/personality.json')
+    const defaultPersonality = await import('../assets/personality.json')
     jsonContent.value = JSON.stringify(defaultPersonality.default, null, 2)
     error.value = ''
     showResetConfirm.value = false

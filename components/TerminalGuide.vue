@@ -46,6 +46,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useSuta } from '../composables/useSuta'
 
 const { currentStatus } = useSuta()
 const isOpen = ref(true)

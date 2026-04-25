@@ -28,7 +28,6 @@ body {
   background-color: var(--void-black);
   color: var(--text-bright);
   font-family: 'Inter', sans-serif;
-  overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
