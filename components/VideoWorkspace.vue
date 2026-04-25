@@ -52,13 +52,8 @@
       </button>
     </div>
 
-    <!-- Reusable Cyber Modal -->
-    <BaseModal 
-      :show="showModal" 
-      title="SYSTEM STATUS" 
-      @close="showModal = false"
-    >
-      <p>{{ modalMessage }}</p>
+    <BaseModal :show="showModal" title="SYSTEM STATUS" @close="showModal = false">
+      <p class="whitespace-pre-wrap">{{ modalMessage }}</p>
     </BaseModal>
   </div>
 </template>
@@ -67,61 +62,112 @@
 import { ref, onUnmounted } from 'vue'
 import { useSuta } from '~/composables/useSuta'
 
-const { addMessage, isListening, currentStatus } = useSuta()
+const config = useRuntimeConfig()
+const { transcript, interimText, isListening, currentStatus, addMessage, setInterim } = useSuta()
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 const isStreaming = ref(false)
 const sourceName = ref('EXTERNAL STREAM')
 const showModal = ref(false)
 const modalMessage = ref('')
+
 let mediaStream: MediaStream | null = null
+let audioContext: AudioContext | null = null
+let source: MediaStreamAudioSourceNode | null = null
+let processor: ScriptProcessorNode | null = null
+let socket: WebSocket | null = null
 
-// Transcription Logic
-let recognition: any = null
+// Translator Logic (Ala VIRA)
+const translate = async (text: string, langPair: string = 'en|id'): Promise<string> => {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`
+  const response = await fetch(url)
+  const json = await response.json()
+  return json?.responseData?.translatedText || "Translation failed"
+}
 
-const initRecognition = () => {
-  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-  if (!SpeechRecognition) {
-    console.warn("Speech Recognition not supported in this browser.")
+const translateLossy = async (text: string): Promise<string> => {
+  try { return await translate(text) } catch (err) { return "Translation failed" }
+}
+
+/**
+ * PCM Conversion (Equivalent to VIRA's f32_to_linear16 in Rust)
+ */
+const float32ToLinear16 = (float32Array: Float32Array) => {
+  const buffer = new Int16Array(float32Array.length)
+  for (let i = 0; i < float32Array.length; i++) {
+    const s = Math.max(-1, Math.min(1, float32Array[i]))
+    buffer[i] = s < 0 ? s * 0x8000 : s * 0x7FFF
+  }
+  return buffer.buffer
+}
+
+/**
+ * Professional Deepgram Integration (Web Audio API / Linear16)
+ */
+const initDeepgram = (stream: MediaStream) => {
+  const apiKey = config.public.deepgramApiKey
+  if (!apiKey) return
+
+  const audioTrack = stream.getAudioTracks()[0]
+  if (!audioTrack) {
+    modalMessage.value = "No audio track detected! Please ensure you check 'Share tab audio'."
+    showModal.value = true
     return
   }
 
-  recognition = new SpeechRecognition()
-  recognition.continuous = true
-  recognition.interimResults = false
-  recognition.lang = 'en-US' // Change to 'id-ID' for Indonesian
+  currentStatus.value = 'connecting'
 
-  recognition.onstart = () => {
+  // Initialize Web Audio API
+  audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 48000 })
+  source = audioContext.createMediaStreamSource(stream)
+  processor = audioContext.createScriptProcessor(4096, 1, 1)
+
+  const url = 'wss://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&interim_results=true&encoding=linear16&sample_rate=48000&channels=1'
+  socket = new WebSocket(url, ['token', apiKey])
+
+  socket.onopen = () => {
     isListening.value = true
     currentStatus.value = 'listening'
+
+    processor!.onaudioprocess = (e) => {
+      const inputData = e.inputBuffer.getChannelData(0)
+      const pcmData = float32ToLinear16(inputData)
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.send(pcmData)
+      }
+    }
+
+    source!.connect(processor!)
+    processor!.connect(audioContext!.destination)
   }
 
-  recognition.onresult = (event: any) => {
-    const result = event.results[event.results.length - 1]
-    const text = result[0].transcript
-    if (result.isFinal) {
-      addMessage('Speaker', text)
+  socket.onmessage = async (message) => {
+    const data = JSON.parse(message.data)
+    const alternatives = data.channel?.alternatives?.[0]
+    const transcriptText = alternatives?.transcript
+    const isFinal = data.is_final
+
+    if (transcriptText && transcriptText.trim() !== "") {
+      if (isFinal) {
+        currentStatus.value = 'processing'
+        const translation = await translateLossy(transcriptText)
+        addMessage('Speaker', transcriptText, translation, true)
+        currentStatus.value = 'listening'
+      } else {
+        setInterim(transcriptText)
+      }
     }
   }
 
-  recognition.onerror = (event: any) => {
-    console.error("Speech recognition error", event.error)
-    if (event.error === 'not-allowed') {
-      modalMessage.value = "Microphone access denied. Transcription requires microphone permissions even when capturing tab audio in some browsers."
-      showModal.value = true
-    }
+  socket.onerror = (error) => {
+    console.error("Deepgram Error:", error)
+    currentStatus.value = 'error'
   }
 
-  recognition.onend = () => {
-    if (isStreaming.value) {
-      recognition.start() // Keep listening if still streaming
-    } else {
-      isListening.value = false
-      currentStatus.value = 'idle'
-    }
+  socket.onclose = () => {
+    isListening.value = false
+    if (currentStatus.value !== 'error') currentStatus.value = 'idle'
   }
-
-  recognition.start()
 }
 
 const startCapture = async () => {
@@ -134,41 +180,32 @@ const startCapture = async () => {
     if (videoRef.value && mediaStream) {
       videoRef.value.srcObject = mediaStream
       isStreaming.value = true
+      sourceName.value = mediaStream.getVideoTracks()[0]?.label || 'SCREEN CAPTURE'
+      mediaStream.getVideoTracks()[0].onended = () => stopCapture()
       
-      const videoTrack = mediaStream.getVideoTracks()[0]
-      if (videoTrack) {
-        sourceName.value = videoTrack.label || 'SCREEN CAPTURE'
-        videoTrack.onended = () => stopCapture()
-      }
-      
-      videoRef.value.play().catch((e: Error) => console.warn("Video play interrupted:", e))
-      
-      // Initialize transcription
-      initRecognition()
+      videoRef.value.play().catch(e => console.warn(e))
+      initDeepgram(mediaStream)
     }
   } catch (err: any) {
-    console.error("Capture error:", err)
-    modalMessage.value = "Failed to select source. Please ensure you are using a modern browser and allow sharing permissions."
+    modalMessage.value = "Failed to select source."
     showModal.value = true
     isStreaming.value = false
   }
 }
 
 const stopCapture = () => {
-  if (mediaStream) {
-    mediaStream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
-    mediaStream = null
+  if (processor) {
+    processor.onaudioprocess = null
+    processor.disconnect()
   }
-  if (videoRef.value) {
-    videoRef.value.srcObject = null
-  }
-  if (recognition) {
-    recognition.stop()
-  }
+  if (source) source.disconnect()
+  if (audioContext) audioContext.close()
+  if (socket) socket.close()
+  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop())
+  if (videoRef.value) videoRef.value.srcObject = null
   isStreaming.value = false
+  currentStatus.value = 'idle'
 }
 
-onUnmounted(() => {
-  stopCapture()
-})
+onUnmounted(() => stopCapture())
 </script>

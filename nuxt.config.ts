@@ -2,6 +2,11 @@
 export default defineNuxtConfig({
   // @ts-ignore - Required by Nitro but not recognized by Nuxt 3.10 types
   compatibilityDate: '2026-04-25',
+  runtimeConfig: {
+    public: {
+      deepgramApiKey: process.env.DEEPGRAM_API_KEY
+    }
+  },
   modules: [
     '@nuxtjs/tailwindcss'
   ],

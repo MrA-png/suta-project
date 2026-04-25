@@ -9,38 +9,84 @@
       </div>
       
       <div class="w-10 h-10 flex items-center justify-center">
-        <div class="relative w-5 h-5" :class="{ 'animate-pulse': status === 'listening' || status === 'processing' }">
+        <div class="relative w-5 h-5">
+          <!-- Core Sphere -->
           <div 
-            class="w-full h-full bg-suta-cyan rounded-full shadow-cyan-glow relative z-10 transition-transform duration-500"
-            :class="{ 'scale-110 shadow-cyan-glow-intense': status === 'listening' }"
+            class="w-full h-full rounded-full relative z-10 transition-all duration-500"
+            :class="{ 
+              'bg-suta-cyan shadow-cyan-glow scale-110 shadow-cyan-glow-intense animate-pulse': status === 'listening' || status === 'processing',
+              'bg-yellow-500/50 scale-90': status === 'connecting',
+              'bg-red-500 shadow-[0_0_10px_#ef4444]': status === 'error',
+              'bg-white/10': status === 'idle'
+            }"
           ></div>
-          <!-- Rings -->
-          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-x-75 w-10 h-10 border border-suta-cyan rounded-full opacity-30" :class="{ 'animate-[spin_2s_linear_infinite]': status === 'listening' }"></div>
-          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-x-75 rotate-y-75 w-10 h-10 border border-suta-cyan rounded-full opacity-30" :class="{ 'animate-[spin_2s_linear_infinite]': status === 'listening' }"></div>
+          
+          <!-- Ring 1 -->
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-x-75 pointer-events-none">
+            <div 
+              class="w-10 h-10 border rounded-full transition-colors duration-500"
+              :class="{ 
+                'border-suta-cyan opacity-30 animate-[spin_4s_linear_infinite]': status === 'listening' || status === 'processing' || status === 'connecting',
+                'border-red-500 opacity-20': status === 'error',
+                'border-white opacity-5 border-dashed': status === 'idle'
+              }"
+            ></div>
+          </div>
+          
+          <!-- Ring 2 -->
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-x-75 rotate-y-75 pointer-events-none">
+            <div 
+              class="w-10 h-10 border rounded-full transition-colors duration-500"
+              :class="{ 
+                'border-suta-cyan opacity-20 animate-[spin_3s_linear_infinite_reverse]': status === 'listening' || status === 'processing' || status === 'connecting',
+                'border-red-500 opacity-10': status === 'error',
+                'border-white opacity-0': status === 'idle'
+              }"
+            ></div>
+          </div>
         </div>
       </div>
     </header>
 
     <!-- Content Area -->
     <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Transcription -->
+      <!-- Transcription Area -->
       <div 
         class="flex-1 p-6 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]" 
         ref="transcriptionRef"
       >
-        <div v-for="(msg, index) in transcript" :key="index" class="mb-5">
-          <span class="text-[10px] font-semibold text-suta-muted uppercase tracking-[1px] block mb-1">
-            {{ msg.speaker }}
-          </span>
-          <p class="text-suta-muted text-[14px] leading-relaxed">
+        <div v-for="(msg, index) in transcript" :key="index" class="mb-6 group">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[10px] font-semibold text-suta-muted uppercase tracking-[1px]">
+              {{ msg.speaker }}
+            </span>
+          </div>
+          
+          <p class="text-suta-muted text-[14px] leading-relaxed transition-colors group-hover:text-white">
             {{ msg.text }}
+          </p>
+          
+          <div v-if="msg.translation" class="mt-2 pl-4 border-l border-suta-cyan/30 animate-in fade-in slide-in-from-left-2 duration-500">
+            <p class="text-suta-cyan text-[13px] italic opacity-90 leading-relaxed font-medium">
+              <span class="inline-block text-[9px] not-italic font-bold bg-suta-cyan/20 px-1.5 py-0.5 rounded mr-2 align-middle">ID</span>
+              {{ msg.translation }}
+            </p>
+          </div>
+        </div>
+
+        <!-- LIVE INTERIM TEXT -->
+        <div v-if="interimText" class="mb-6 opacity-70">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[10px] font-bold text-suta-cyan uppercase tracking-[2px] animate-pulse">LIVE CAPTION</span>
+          </div>
+          <p class="text-white text-[14px] leading-relaxed italic">
+            {{ interimText }}<span class="inline-block w-1 h-4 bg-suta-cyan ml-1 animate-ping"></span>
           </p>
         </div>
       </div>
 
       <!-- Teleprompter / Guide -->
       <div class="border-t border-suta-border bg-black/20">
-        <!-- Collapsible Header -->
         <div 
           class="p-4 px-6 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors group"
           @click="isGuideOpen = !isGuideOpen"
@@ -52,11 +98,10 @@
             class="w-4 h-4 text-suta-muted transition-transform duration-300"
             :class="{ 'rotate-180': isGuideOpen }"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            <div class="w-full h-full bg-current [mask-image:url(/icons/source.svg)] [mask-size:contain] [mask-repeat:no-repeat] rotate-180"></div>
           </div>
         </div>
 
-        <!-- Collapsible Content -->
         <div 
           v-show="isGuideOpen"
           class="px-6 pb-6 animate-in fade-in slide-in-from-bottom-2 duration-300"
@@ -70,7 +115,6 @@
             </div>
           </div>
           
-          <!-- Action Buttons -->
           <div class="mt-8 flex justify-end">
             <button 
               class="flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-md text-suta-muted text-[10px] font-medium tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 uppercase"
@@ -90,7 +134,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useSuta } from '~/composables/useSuta'
 
-const { transcript, currentStatus: status } = useSuta()
+const { transcript, interimText, currentStatus: status } = useSuta()
 
 const isGuideOpen = ref(true)
 const fullSuggestion = "Welcome to Suta.\n\nTo begin:\n1. Click 'Change Source'.\n2. Select your Meet/Zoom tab.\n3. Enable 'Share tab audio'.\n\nSuta will start assisting instantly."
@@ -110,12 +154,12 @@ onMounted(() => {
 })
 
 watch(status, (newStatus) => {
-  if (newStatus === 'listening') {
+  if (newStatus === 'listening' || newStatus === 'processing' || newStatus === 'connecting') {
     isGuideOpen.value = false
   }
 })
 
-watch(transcript, () => {
+watch([transcript, interimText], () => {
   if (transcriptionRef.value) {
     setTimeout(() => {
       if (transcriptionRef.value) {
@@ -131,7 +175,6 @@ const togglePin = () => {
 </script>
 
 <style scoped>
-/* Keeping only the non-standard perspective transforms for the 3D rings */
 .rotate-x-75 { transform: translate(-50%, -50%) rotateX(75deg); }
 .rotate-y-75 { transform: translate(-50%, -50%) rotateX(75deg) rotateY(75deg); }
 </style>
