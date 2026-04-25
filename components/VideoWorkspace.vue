@@ -34,7 +34,8 @@ const sourceName = ref('External Stream')
 const showModal = ref(false)
 const modalMessage = ref('')
 
-let mediaStream: MediaStream | null = null
+// Use a ref for mediaStream to ensure reactivity and consistent reference
+const activeStream = ref<MediaStream | null>(null)
 let audioContext: AudioContext | null = null
 let sourceNode: MediaStreamAudioSourceNode | null = null
 let workletNode: AudioWorkletNode | null = null
@@ -131,7 +132,7 @@ const initDeepgram = async (stream: MediaStream) => {
     socket.onclose = () => {
       isListening.value = false
       if (isStreaming.value && currentStatus.value !== 'error') {
-        setTimeout(() => isStreaming.value && initDeepgram(stream), 1000)
+        setTimeout(() => isStreaming.value && activeStream.value && initDeepgram(activeStream.value), 1000)
       } else if (!isStreaming.value) {
         currentStatus.value = 'idle'
       }
@@ -144,42 +145,96 @@ const initDeepgram = async (stream: MediaStream) => {
 
 // --- Action Methods ---
 const startCapture = async () => {
+  // 1. Safety first: If already streaming, stop everything first
+  if (isStreaming.value || activeStream.value) {
+    stopCapture()
+  }
+
   try {
-    mediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+    const stream = await navigator.mediaDevices.getDisplayMedia({ 
+      video: { cursor: 'always' } as any, 
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
+    })
+    
+    activeStream.value = stream
     isStreaming.value = true
-    sourceName.value = mediaStream.getVideoTracks()[0]?.label || 'Screen Capture'
+    sourceName.value = stream.getVideoTracks()[0]?.label || 'Screen Capture'
     
     if (displayRef.value?.videoElement) {
-      displayRef.value.videoElement.srcObject = mediaStream
+      displayRef.value.videoElement.srcObject = stream
     }
     
-    mediaStream.getVideoTracks()[0].onended = () => stopCapture()
-    await initDeepgram(mediaStream)
+    stream.getVideoTracks()[0].onended = () => stopCapture()
+    await initDeepgram(stream)
   } catch (err) {
     console.error("Capture failed:", err)
     isStreaming.value = false
+    activeStream.value = null
   }
 }
 
 const stopDeepgram = () => {
   if (keepAliveTimer) clearInterval(keepAliveTimer)
-  if (workletNode) { workletNode.port.onmessage = null; workletNode.disconnect() }
-  if (sourceNode) sourceNode.disconnect()
-  if (audioContext) audioContext.close()
-  if (socket) socket.close()
-  workletNode = sourceNode = audioContext = socket = null
+  
+  if (socket) {
+    socket.onclose = null // Prevent auto-reconnect trigger
+    socket.close()
+  }
+  
+  if (workletNode) {
+    workletNode.port.onmessage = null
+    workletNode.disconnect()
+  }
+  
+  if (sourceNode) {
+    sourceNode.disconnect()
+  }
+  
+  if (audioContext) {
+    audioContext.close()
+  }
+  
+  socket = null
+  workletNode = null
+  sourceNode = null
+  audioContext = null
 }
 
 const stopCapture = () => {
+  console.log("Initiating complete hardware shutdown...")
+  
+  // 1. Stop audio processing first
   stopDeepgram()
-  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop())
+  
+  // 2. Clear video source
+  if (displayRef.value?.videoElement) {
+    displayRef.value.videoElement.srcObject = null
+  }
+
+  // 3. Kill all tracks in the current stream
+  if (activeStream.value) {
+    const tracks = activeStream.value.getTracks()
+    tracks.forEach(track => {
+      track.enabled = false // Disable first
+      track.stop()         // Then stop
+      console.log(`Hardware track [${track.kind}] has been killed.`)
+    })
+    activeStream.value = null
+  }
+
   isStreaming.value = false
-  mediaStream = null
   currentStatus.value = 'idle'
 }
 
 watch(() => settings.value.sourceLang, () => {
-  if (isStreaming.value) { stopDeepgram(); initDeepgram(mediaStream!) }
+  if (isStreaming.value && activeStream.value) { 
+    stopDeepgram()
+    initDeepgram(activeStream.value) 
+  }
 })
 
 onUnmounted(() => stopCapture())

@@ -17,7 +17,7 @@
       @click="$emit('stop')" 
       title="Stop Capture"
     >
-      <div class="w-5 h-5 bg-current [mask-image:url(/icons/stop.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
+      <div class="w-5 h-5 bg-current [mask-image:url(/icons/stop-circle-svgrepo-com.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
     </button>
   </div>
 </template>
