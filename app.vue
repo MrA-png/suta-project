@@ -1,21 +1,24 @@
 <template>
-  <div class="suta-app">
+  <div class="h-screen w-screen bg-suta-black flex overflow-hidden font-sans text-white">
     <div 
-      class="workspace-container" 
+      class="grid w-full h-full" 
       :style="{ gridTemplateColumns: `${splitPercentage}% 1px auto` }"
     >
       <!-- Video Area -->
-      <section class="video-section">
+      <section class="relative overflow-hidden">
         <VideoWorkspace />
       </section>
 
       <!-- Resizer -->
-      <div class="resizer" @mousedown="startResizing">
-        <div class="resizer-line"></div>
+      <div 
+        class="w-[10px] ml-[-5px] cursor-col-resize z-10 flex justify-center transition-opacity duration-300 group"
+        @mousedown="startResizing"
+      >
+        <div class="w-[1px] h-full bg-suta-border group-hover:bg-suta-cyan group-hover:shadow-cyan-glow"></div>
       </div>
 
       <!-- Terminal Area -->
-      <section class="terminal-section">
+      <section class="bg-suta-dark-gray overflow-hidden">
         <SutaTerminal />
       </section>
     </div>
@@ -51,49 +54,6 @@ const stopResizing = () => {
 }
 </script>
 
-<style scoped>
-.suta-app {
-  height: 100vh;
-  width: 100vw;
-  background-color: var(--void-black);
-  display: flex;
-  overflow: hidden;
-}
-
-.workspace-container {
-  display: grid;
-  width: 100%;
-  height: 100%;
-}
-
-.video-section {
-  position: relative;
-  overflow: hidden;
-}
-
-.terminal-section {
-  background-color: var(--dark-gray);
-  overflow: hidden;
-}
-
-.resizer {
-  width: 10px;
-  margin-left: -5px;
-  cursor: col-resize;
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  transition: opacity 0.3s;
-}
-
-.resizer-line {
-  width: 1px;
-  height: 100%;
-  background-color: var(--border-muted);
-}
-
-.resizer:hover .resizer-line {
-  background-color: var(--electric-cyan);
-  box-shadow: var(--cyan-glow);
-}
+<style>
+/* Global styles stay in main.css but we can remove app-specific scoped styles */
 </style>
