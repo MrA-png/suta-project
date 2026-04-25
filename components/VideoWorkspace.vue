@@ -65,6 +65,9 @@
 
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
+import { useSuta } from '~/composables/useSuta'
+
+const { addMessage, isListening, currentStatus } = useSuta()
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 const isStreaming = ref(false)
@@ -73,8 +76,55 @@ const showModal = ref(false)
 const modalMessage = ref('')
 let mediaStream: MediaStream | null = null
 
+// Transcription Logic
+let recognition: any = null
+
+const initRecognition = () => {
+  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  if (!SpeechRecognition) {
+    console.warn("Speech Recognition not supported in this browser.")
+    return
+  }
+
+  recognition = new SpeechRecognition()
+  recognition.continuous = true
+  recognition.interimResults = false
+  recognition.lang = 'en-US' // Change to 'id-ID' for Indonesian
+
+  recognition.onstart = () => {
+    isListening.value = true
+    currentStatus.value = 'listening'
+  }
+
+  recognition.onresult = (event: any) => {
+    const result = event.results[event.results.length - 1]
+    const text = result[0].transcript
+    if (result.isFinal) {
+      addMessage('Speaker', text)
+    }
+  }
+
+  recognition.onerror = (event: any) => {
+    console.error("Speech recognition error", event.error)
+    if (event.error === 'not-allowed') {
+      modalMessage.value = "Microphone access denied. Transcription requires microphone permissions even when capturing tab audio in some browsers."
+      showModal.value = true
+    }
+  }
+
+  recognition.onend = () => {
+    if (isStreaming.value) {
+      recognition.start() // Keep listening if still streaming
+    } else {
+      isListening.value = false
+      currentStatus.value = 'idle'
+    }
+  }
+
+  recognition.start()
+}
+
 const startCapture = async () => {
-  console.log("Requesting display media...");
   try {
     mediaStream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
@@ -92,10 +142,13 @@ const startCapture = async () => {
       }
       
       videoRef.value.play().catch((e: Error) => console.warn("Video play interrupted:", e))
+      
+      // Initialize transcription
+      initRecognition()
     }
   } catch (err: any) {
-    console.error("Modal capture error:", err)
-    modalMessage.value = "Browser failed to initiate source selection. Ensure you are on a secure connection (HTTPS/localhost) and have allowed screen sharing permissions."
+    console.error("Capture error:", err)
+    modalMessage.value = "Failed to select source. Please ensure you are using a modern browser and allow sharing permissions."
     showModal.value = true
     isStreaming.value = false
   }
@@ -108,6 +161,9 @@ const stopCapture = () => {
   }
   if (videoRef.value) {
     videoRef.value.srcObject = null
+  }
+  if (recognition) {
+    recognition.stop()
   }
   isStreaming.value = false
 }
