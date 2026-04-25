@@ -1,18 +1,44 @@
 <template>
-  <div class="relative w-full h-full bg-black">
-    <!-- Main Display -->
-    <VideoDisplay 
-      ref="displayRef"
-      :is-streaming="isStreaming" 
-      :source-name="sourceName" 
-    />
+  <div class="flex flex-col w-full h-full bg-black select-none">
+    <!-- Main Display Area -->
+    <div class="relative flex-1 min-h-0">
+      <VideoDisplay 
+        ref="displayRef"
+        :is-streaming="isStreaming" 
+        :source-name="sourceName" 
+      />
 
-    <!-- Controls Overlay -->
-    <VideoControls 
-      :is-streaming="isStreaming"
-      @start="startCapture"
-      @stop="stopCapture"
-    />
+      <!-- Controls Overlay -->
+      <VideoControls 
+        :is-streaming="isStreaming"
+        @start="startCapture"
+        @stop="stopCapture"
+      />
+    </div>
+
+    <!-- Resizer Handle (Ultra-thin style with Center Grip) -->
+    <div 
+      v-if="isAIPanelOpen"
+      class="h-[10px] -my-[5px] w-full cursor-row-resize z-30 relative group flex items-center justify-center"
+      @mousedown="startResizing"
+    >
+      <!-- The Line -->
+      <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-white/[0.05] group-hover:bg-suta-cyan/30 transition-colors"></div>
+      
+      <!-- The Grip Dots -->
+      <div class="relative z-10 px-3 bg-black flex gap-1 items-center">
+        <div v-for="i in 3" :key="i" class="w-1 h-1 rounded-full bg-white/10 group-hover:bg-suta-cyan/60 transition-colors"></div>
+      </div>
+    </div>
+
+    <!-- Embedded AI Help Panel -->
+    <div 
+      v-if="isAIPanelOpen" 
+      :style="{ height: aiPanelHeight + 'px' }"
+      class="flex-shrink-0 border-t border-white/5 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20 overflow-hidden"
+    >
+      <TerminalAIPanel />
+    </div>
 
     <!-- Status Modal -->
     <BaseModal :show="showModal" title="SYSTEM STATUS" @close="showModal = false">
@@ -26,7 +52,7 @@ import { ref, onUnmounted, watch } from 'vue'
 import { useSuta } from '~/composables/useSuta'
 
 const config = useRuntimeConfig()
-const { settings, currentStatus, isListening, transcript, addMessage, setInterim, updateLastMessageTranslation, clearTranscript } = useSuta()
+const { settings, currentStatus, isListening, transcript, isAIPanelOpen, addMessage, setInterim, updateLastMessageTranslation, clearTranscript } = useSuta()
 
 const displayRef = ref<any>(null)
 const isStreaming = ref(false)
@@ -34,7 +60,34 @@ const sourceName = ref('External Stream')
 const showModal = ref(false)
 const modalMessage = ref('')
 
-// Use a ref for mediaStream to ensure reactivity and consistent reference
+// Resizing Logic
+const aiPanelHeight = ref(280)
+const isResizing = ref(false)
+
+const startResizing = (e: MouseEvent) => {
+  isResizing.value = true
+  document.addEventListener('mousemove', handleResizing)
+  document.addEventListener('mouseup', stopResizing)
+  document.body.style.cursor = 'row-resize'
+}
+
+const handleResizing = (e: MouseEvent) => {
+  if (!isResizing.value) return
+  // Calculate height from bottom
+  const newHeight = window.innerHeight - e.clientY
+  // Set limits (min 150px, max 70% of screen)
+  if (newHeight > 150 && newHeight < window.innerHeight * 0.7) {
+    aiPanelHeight.value = newHeight
+  }
+}
+
+const stopResizing = () => {
+  isResizing.value = false
+  document.removeEventListener('mousemove', handleResizing)
+  document.removeEventListener('mouseup', stopResizing)
+  document.body.style.cursor = 'default'
+}
+
 const activeStream = ref<MediaStream | null>(null)
 let audioContext: AudioContext | null = null
 let sourceNode: MediaStreamAudioSourceNode | null = null
@@ -145,7 +198,6 @@ const initDeepgram = async (stream: MediaStream) => {
 
 // --- Action Methods ---
 const startCapture = async () => {
-  // 1. Safety first: If already streaming, stop everything first
   if (isStreaming.value || activeStream.value) {
     stopCapture()
   }
@@ -179,67 +231,33 @@ const startCapture = async () => {
 
 const stopDeepgram = () => {
   if (keepAliveTimer) clearInterval(keepAliveTimer)
-  
-  if (socket) {
-    socket.onclose = null // Prevent auto-reconnect trigger
-    socket.close()
-  }
-  
-  if (workletNode) {
-    workletNode.port.onmessage = null
-    workletNode.disconnect()
-  }
-  
-  if (sourceNode) {
-    sourceNode.disconnect()
-  }
-  
-  if (audioContext) {
-    audioContext.close()
-  }
-  
-  socket = null
-  workletNode = null
-  sourceNode = null
-  audioContext = null
+  if (socket) { socket.onclose = null; socket.close() }
+  if (workletNode) { workletNode.port.onmessage = null; workletNode.disconnect() }
+  if (sourceNode) sourceNode.disconnect()
+  if (audioContext) audioContext.close()
+  socket = workletNode = sourceNode = audioContext = null
 }
 
 const stopCapture = () => {
   console.log("Initiating complete hardware shutdown...")
-  
-  // Auto-archive current session before clearing
   if (transcript.value.length > 0 && transcript.value[0].speaker !== 'System') {
     clearTranscript(true)
   }
-
-  // 1. Stop audio processing first
   stopDeepgram()
-  
-  // 2. Clear video source
-  if (displayRef.value?.videoElement) {
-    displayRef.value.videoElement.srcObject = null
-  }
-
-  // 3. Kill all tracks in the current stream
+  if (displayRef.value?.videoElement) displayRef.value.videoElement.srcObject = null
   if (activeStream.value) {
-    const tracks = activeStream.value.getTracks()
-    tracks.forEach(track => {
-      track.enabled = false // Disable first
-      track.stop()         // Then stop
-      console.log(`Hardware track [${track.kind}] has been killed.`)
+    activeStream.value.getTracks().forEach(track => {
+      track.enabled = false
+      track.stop()
     })
     activeStream.value = null
   }
-
   isStreaming.value = false
   currentStatus.value = 'idle'
 }
 
 watch(() => settings.value.sourceLang, () => {
-  if (isStreaming.value && activeStream.value) { 
-    stopDeepgram()
-    initDeepgram(activeStream.value) 
-  }
+  if (isStreaming.value && activeStream.value) { stopDeepgram(); initDeepgram(activeStream.value) }
 })
 
 onUnmounted(() => stopCapture())

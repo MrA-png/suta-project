@@ -9,12 +9,18 @@
         <VideoWorkspace />
       </section>
 
-      <!-- Resizer -->
+      <!-- Resizer (Vertical) -->
       <div 
-        class="w-[10px] ml-[-5px] cursor-col-resize z-10 flex justify-center transition-opacity duration-300 group"
+        class="w-[10px] ml-[-5px] cursor-col-resize z-10 flex items-center justify-center transition-all duration-300 group relative"
         @mousedown="startResizing"
       >
-        <div class="w-[1px] h-full bg-suta-border group-hover:bg-suta-cyan group-hover:shadow-cyan-glow"></div>
+        <!-- The Line -->
+        <div class="w-[2px] h-full bg-white/10 group-hover:bg-suta-cyan/40 transition-colors"></div>
+        
+        <!-- The Grip Dots (Vertical) -->
+        <div class="absolute top-1/2 -translate-y-1/2 py-4 bg-suta-black flex flex-col gap-1.5 items-center z-20">
+          <div v-for="i in 3" :key="i" class="w-[3px] h-[3px] rounded-full bg-white/10 group-hover:bg-suta-cyan/60 transition-colors"></div>
+        </div>
       </div>
 
       <!-- Terminal Area -->

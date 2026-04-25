@@ -29,6 +29,7 @@ export const useSuta = () => {
   const interimText = useState('suta-interim', () => '')
   const isListening = useState('suta-listening', () => false)
   const currentStatus = useState('suta-status', () => 'idle')
+  const isAIPanelOpen = useState('suta-ai-panel', () => false)
   
   const settings = useState<SutaSettings>('suta-settings', () => ({
     sourceLang: 'en-US',
@@ -98,6 +99,7 @@ export const useSuta = () => {
     currentStatus, 
     settings,
     history,
+    isAIPanelOpen,
     addMessage, 
     setInterim,
     clearTranscript,

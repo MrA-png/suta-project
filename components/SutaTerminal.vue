@@ -9,6 +9,19 @@
       </div>
       
       <div class="flex items-center gap-2">
+        <!-- AI Help Button -->
+        <button 
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 text-suta-cyan hover:bg-suta-cyan hover:text-black transition-all group"
+          @click="isAIPanelOpen = !isAIPanelOpen"
+          title="AI Assistant"
+        >
+          <div class="w-4 h-4 bg-current [mask-image:url(/icons/ai.svg)] [mask-size:contain] [mask-repeat:no-repeat] animate-pulse"></div>
+          <span class="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">AI Help</span>
+        </button>
+
+        <div class="w-[1px] h-4 bg-white/10 mx-1"></div>
+
+        <!-- History Button -->
         <button 
           class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-suta-muted hover:text-suta-cyan transition-all"
           @click="showHistory = true"
@@ -17,6 +30,7 @@
           <div class="w-5 h-5 bg-current [mask-image:url(/icons/archive-svgrepo-com.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
         </button>
 
+        <!-- Settings Button -->
         <button 
           class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-suta-muted hover:text-suta-cyan transition-all"
           @click="showSettings = true"
@@ -68,6 +82,7 @@
     <!-- Modals -->
     <TerminalHistoryModal :show="showHistory" @close="showHistory = false" />
     <TerminalSettingsModal :show="showSettings" @close="showSettings = false" />
+    <TerminalAIModal :show="showAI" @close="showAI = false" />
 
     <!-- Reset Confirmation Dialog -->
     <BaseConfirmation 
@@ -87,7 +102,7 @@
 import { ref, watch, nextTick } from 'vue'
 import { useSuta } from '~/composables/useSuta'
 
-const { transcript, interimText, currentStatus: status, settings, clearTranscript } = useSuta()
+const { transcript, interimText, currentStatus: status, settings, isAIPanelOpen, clearTranscript } = useSuta()
 
 const showSettings = ref(false)
 const showHistory = ref(false)
