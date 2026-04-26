@@ -52,16 +52,30 @@
     </NuxtLink>
   </div>
 </template>
-
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   isStreaming: boolean
   sourceName: string
+  stream: MediaStream | null
 }>()
 
 const videoRef = ref<HTMLVideoElement | null>(null)
+
+// Watch for stream changes and update video element
+watch(() => props.stream, (newStream) => {
+  if (videoRef.value) {
+    videoRef.value.srcObject = newStream
+  }
+}, { immediate: true })
+
+// Also ensure it's set on mount if stream already exists
+onMounted(() => {
+  if (videoRef.value && props.stream) {
+    videoRef.value.srcObject = props.stream
+  }
+})
 
 // Expose the video element to the parent
 defineExpose({ videoElement: videoRef })

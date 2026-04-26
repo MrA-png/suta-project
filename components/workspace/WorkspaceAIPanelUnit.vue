@@ -7,8 +7,13 @@
       <!-- Top Row: Brand & Close -->
       <div class="flex items-center justify-between w-full">
         <div class="flex items-center gap-2 flex-shrink-0">
-          <span class="text-[10px] font-bold text-suta-cyan uppercase tracking-[2px] whitespace-nowrap">
-            {{ panelWidth < 300 ? 'SUTA AI' : 'Secret Whisperer Mode' }}
+          <template v-if="panelWidth < 300">
+            <h1 class="text-[20px] font-extrabold tracking-tight text-white transition-colors">
+              Suta<span class="text-suta-cyan">.</span>
+            </h1>
+          </template>
+          <span v-else class="text-[10px] font-bold text-suta-cyan uppercase tracking-[2px] whitespace-nowrap">
+            Secret Whisperer Mode
           </span>
         </div>
 

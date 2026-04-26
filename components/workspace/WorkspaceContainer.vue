@@ -1,11 +1,15 @@
 <template>
   <div class="flex flex-col w-full h-full bg-black select-none">
     <!-- Main Display Area -->
-    <div class="relative flex-1 min-h-0">
+    <div 
+      class="relative flex-1 min-h-0"
+      :class="{ 'pointer-events-none': isResizing }"
+    >
       <WorkspaceVideoDisplay 
         ref="displayRef"
         :is-streaming="isStreaming" 
         :source-name="sourceName" 
+        :stream="activeStream"
       />
 
       <!-- Controls Overlay -->
@@ -59,7 +63,7 @@ const showModal = ref(false)
 const modalMessage = ref('')
 
 // Resizing Logic
-const terminalHeight = ref(350)
+const terminalHeight = ref(288)
 const isResizing = ref(false)
 
 const startResizing = (e: MouseEvent) => {
@@ -73,8 +77,8 @@ const handleResizing = (e: MouseEvent) => {
   if (!isResizing.value) return
   // Calculate height from bottom
   const newHeight = window.innerHeight - e.clientY
-  // Set limits (min 150px, max 70% of screen)
-  if (newHeight > 150 && newHeight < window.innerHeight * 0.7) {
+  // Set limits (min 100px, max 70% of screen)
+  if (newHeight > 100 && newHeight < window.innerHeight * 0.7) {
     terminalHeight.value = newHeight
   }
 }
