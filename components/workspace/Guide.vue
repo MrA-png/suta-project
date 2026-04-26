@@ -40,13 +40,13 @@
     </div>
 
     <!-- Full Documentation Modal -->
-    <TerminalDocsModal :show="showDocs" @close="showDocs = false" />
+    <WorkspaceModalsDocs :show="showDocs" @close="showDocs = false" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useSuta } from '../composables/useSuta'
+import { useSuta } from '~/composables/useSuta'
 
 const { currentStatus } = useSuta()
 const isOpen = ref(true)

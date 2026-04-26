@@ -76,8 +76,6 @@
         </div>
       </div>
 
-      <!-- Quick Start Guide -->
-      <WorkspaceGuide />
     </div>
 
     <!-- Modals -->

@@ -1,7 +1,9 @@
 <template>
-  <div class="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
+  <div 
+    class="relative w-full h-full bg-black flex items-center justify-center overflow-hidden"
+  >
     <!-- Custom ASCII Glitch Cursor (Only Offline) -->
-    <GlitchCursor v-if="!isStreaming" />
+    <GlitchCursor v-if="!isStreaming" is-absolute />
 
     <!-- Real Video Stream -->
     <video 

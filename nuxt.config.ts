@@ -1,6 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  // @ts-ignore - Required by Nitro but not recognized by Nuxt 3.10 types
   compatibilityDate: '2026-04-25',
   runtimeConfig: {
     public: {
@@ -25,5 +24,18 @@ export default defineNuxtConfig({
   },
   nitro: {
     compatibilityDate: '2026-04-25'
-  }
+  },
+  typescript: {
+    tsConfig: {
+      compilerOptions: {
+        module: 'esnext',
+        moduleResolution: 'bundler'
+      }
+    }
+  },
+  components: [
+    { path: '~/components', pathPrefix: true },
+    { path: '~/components/landing', pathPrefix: false },
+    { path: '~/components/shared', pathPrefix: false }
+  ]
 })

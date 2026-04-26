@@ -37,8 +37,9 @@ export const useSuta = () => {
   
   const interimText = useState('suta-interim', () => '')
   const isListening = useState('suta-listening', () => false)
+  const isStreaming = useState('suta-streaming', () => false)
   const currentStatus = useState('suta-status', () => 'idle')
-  const isAIPanelOpen = useState('suta-ai-panel', () => false)
+  const isAIPanelOpen = useState('suta-ai-panel', () => true)
   
   const settings = useState<SutaSettings>('suta-settings', () => ({
     sourceLang: 'en-US',
@@ -128,6 +129,7 @@ export const useSuta = () => {
     transcript, 
     interimText, 
     isListening, 
+    isStreaming,
     currentStatus, 
     settings,
     history,

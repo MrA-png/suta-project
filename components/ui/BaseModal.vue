@@ -3,7 +3,7 @@
     <Transition name="fade">
       <div v-if="show" class="fixed inset-0 w-screen h-screen flex items-center justify-center z-[9999]" @click.self="$emit('close')">
         <div 
-          class="w-[90%] p-10 rounded-[24px] bg-white/5 backdrop-blur-[25px] border border-white/10 relative overflow-hidden transition-all duration-300"
+          class="w-[90%] p-10 rounded-[24px] bg-white/5 backdrop-blur-[25px] border border-white/10 relative overflow-hidden"
           :class="wide ? 'max-w-[640px]' : 'max-w-[440px]'"
         >
           <!-- Header -->
@@ -69,7 +69,7 @@ defineEmits(['close'])
 /* Simplified Transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.1s ease-out;
 }
 
 .fade-enter-from,

@@ -16,14 +16,13 @@
       />
     </div>
 
-    <!-- Resizer Handle (Ultra-thin style with Center Grip) -->
+    <!-- Resizer Handle (Horizontal line between Video and Terminal) -->
     <div 
-      v-if="isAIPanelOpen"
       class="h-[10px] -my-[5px] w-full cursor-row-resize z-30 relative group flex items-center justify-center"
       @mousedown="startResizing"
     >
       <!-- The Line -->
-      <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-white/[0.05] group-hover:bg-suta-cyan/30 transition-colors"></div>
+      <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-white/10 group-hover:bg-suta-cyan/40 transition-colors"></div>
       
       <!-- The Grip Dots -->
       <div class="relative z-10 px-3 bg-black flex gap-1 items-center">
@@ -31,13 +30,12 @@
       </div>
     </div>
 
-    <!-- Embedded AI Help Panel -->
+    <!-- Embedded Terminal Unit -->
     <div 
-      v-if="isAIPanelOpen" 
-      :style="{ height: aiPanelHeight + 'px' }"
+      :style="{ height: terminalHeight + 'px' }"
       class="flex-shrink-0 border-t border-white/5 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-20 overflow-hidden"
     >
-      <WorkspaceWorkspaceAIPanelUnit />
+      <WorkspaceTerminalUnit />
     </div>
 
     <!-- Status Modal -->
@@ -53,16 +51,15 @@ import { useSuta } from '../../composables/useSuta'
 
 // IDE_SYNC: Forcing refresh of module resolution
 const { public: config } = useRuntimeConfig()
-const { settings, currentStatus, isListening, transcript, isAIPanelOpen, addMessage, setInterim, updateLastMessageTranslation, clearTranscript } = useSuta()
+const { settings, currentStatus, isListening, isStreaming, transcript, isAIPanelOpen, addMessage, setInterim, updateLastMessageTranslation, clearTranscript } = useSuta()
 
 const displayRef = ref<any>(null)
-const isStreaming = ref(false)
 const sourceName = ref('External Stream')
 const showModal = ref(false)
 const modalMessage = ref('')
 
 // Resizing Logic
-const aiPanelHeight = ref(280)
+const terminalHeight = ref(350)
 const isResizing = ref(false)
 
 const startResizing = (e: MouseEvent) => {
@@ -78,7 +75,7 @@ const handleResizing = (e: MouseEvent) => {
   const newHeight = window.innerHeight - e.clientY
   // Set limits (min 150px, max 70% of screen)
   if (newHeight > 150 && newHeight < window.innerHeight * 0.7) {
-    aiPanelHeight.value = newHeight
+    terminalHeight.value = newHeight
   }
 }
 

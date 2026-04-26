@@ -1,20 +1,37 @@
 <template>
   <div class="h-full bg-suta-dark-gray border-t border-suta-border flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500">
-    <!-- Panel Header -->
-    <div class="px-6 py-3 border-b border-white/5 flex items-center justify-between bg-black/20">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <div class="w-3.5 h-3.5 bg-suta-cyan [mask-image:url(/icons/ai.svg)] [mask-size:contain] [mask-repeat:no-repeat] animate-pulse"></div>
-          <span class="text-[10px] font-bold text-suta-cyan uppercase tracking-[2px]">Secret Whisperer Mode</span>
+    <div 
+      ref="headerRef"
+      class="px-6 py-3 border-b border-white/5 flex flex-col gap-3 bg-black/20 transition-all duration-300 relative"
+    >
+      <!-- Top Row: Brand & Close -->
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="text-[10px] font-bold text-suta-cyan uppercase tracking-[2px] whitespace-nowrap">
+            {{ panelWidth < 300 ? 'SUTA AI' : 'Secret Whisperer Mode' }}
+          </span>
         </div>
-        
+
+        <button 
+          @click="isAIPanelOpen = false" 
+          class="text-suta-muted hover:text-white transition-colors p-1"
+        >
+          <div class="w-4 h-4 bg-current [mask-image:url(/icons/close.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
+        </button>
+      </div>
+      
+      <!-- Bottom Row: Controls -->
+      <div 
+        class="flex gap-2 items-center"
+        :class="panelWidth < 350 ? 'justify-between' : 'justify-start'"
+      >
         <!-- Model Selector -->
-        <div class="flex items-center bg-white/5 rounded-full p-0.5 border border-white/10">
+        <div class="flex items-center bg-white/5 rounded-full p-0.5 border border-white/10 flex-shrink-0">
           <button 
             v-for="m in ['gemini', 'openrouter']" 
             :key="m"
             @click="activeModel = m as any"
-            class="px-3 py-1 rounded-full text-[8px] font-bold uppercase transition-all"
+            class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase transition-all"
             :class="activeModel === m ? 'bg-suta-cyan text-black' : 'text-suta-muted hover:text-white'"
           >
             {{ m }}
@@ -24,15 +41,12 @@
         <!-- Personality Settings Button -->
         <button 
           @click="isPersonalityModalOpen = true"
-          class="px-3 py-1.5 rounded bg-white/5 border border-white/10 hover:bg-white/10 hover:border-suta-cyan/30 transition-all group flex items-center gap-2"
+          class="px-3 py-1.5 rounded bg-white/5 border border-white/10 hover:bg-white/10 hover:border-suta-cyan/30 transition-all group flex items-center gap-2 flex-shrink-0"
         >
-          <div class="w-3 h-3 bg-suta-cyan/60 group-hover:bg-suta-cyan [mask-image:url(/icons/settings.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
-          <span class="text-[8px] font-bold text-suta-muted group-hover:text-white uppercase tracking-widest">Neural Profile</span>
+          <span v-if="panelWidth > 350" class="text-[8px] font-bold text-suta-muted group-hover:text-white uppercase tracking-widest">Neural Profile</span>
+          <span v-else class="text-[8px] font-bold text-suta-cyan uppercase tracking-tighter">Profile</span>
         </button>
       </div>
-      <button @click="isAIPanelOpen = false" class="text-suta-muted hover:text-white transition-colors">
-        <div class="w-4 h-4 bg-current [mask-image:url(/icons/clear.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
-      </button>
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 custom-scrollbar relative">
@@ -56,7 +70,7 @@
       </div>
 
       <!-- AI Content -->
-      <div v-else-if="analysisResult" class="animate-in fade-in slide-in-from-top-2 duration-500 pb-4">
+      <div v-else-if="analysisResult && isStreaming" class="animate-in fade-in slide-in-from-top-2 duration-500 pb-4">
         <div class="bg-white/[0.03] border border-white/10 p-5 rounded-xl relative overflow-hidden group">
           <div class="absolute top-0 right-0 w-32 h-32 bg-suta-cyan/5 blur-3xl pointer-events-none group-hover:bg-suta-cyan/10 transition-all"></div>
           
@@ -90,23 +104,55 @@
       
       <!-- Error / Empty State -->
       <div v-else class="py-12 text-center">
-        <p class="text-[10px] text-suta-muted uppercase tracking-[2px] opacity-30 italic">Whisperer Unit Standing By...</p>
+        <div v-if="!isStreaming" class="flex flex-col items-center gap-3 opacity-40">
+          <p class="text-[10px] text-suta-muted uppercase tracking-[2px] italic">Source Offline: Waiting for Connection...</p>
+        </div>
+        <p v-else class="text-[10px] text-suta-muted uppercase tracking-[2px] opacity-30 italic">Whisperer Unit Standing By...</p>
       </div>
     </div>
+
+    <!-- Quick Start Guide (Moved from Terminal) -->
+    <WorkspaceGuide />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useSuta } from '../../composables/useSuta'
 
 // Explicitly extracting public config for the AI Unit
 const { public: config } = useRuntimeConfig()
-const { transcript, isAIPanelOpen, settings, personality } = useSuta()
+const { transcript, isAIPanelOpen, isStreaming, settings, personality } = useSuta()
 const isAnalyzing = ref(false)
 const isPersonalityModalOpen = ref(false)
 const analysisResult = ref('')
 const activeModel = ref<'gemini' | 'openrouter'>('gemini')
+
+// Responsive logic
+const headerRef = ref<HTMLElement | null>(null)
+const panelWidth = ref(500)
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  if (isStreaming.value) {
+    performAIAnalysis()
+  }
+  
+  if (headerRef.value) {
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        panelWidth.value = entry.contentRect.width
+      }
+    })
+    resizeObserver.observe(headerRef.value)
+  }
+})
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
+})
 
 // Formatter to make the output look like a pro whisperer
 const formattedResult = computed(() => {
@@ -197,9 +243,6 @@ const performAIAnalysis = async () => {
   }
 }
 
-onMounted(() => {
-  performAIAnalysis()
-})
 </script>
 
 <style scoped>

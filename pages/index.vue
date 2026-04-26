@@ -21,14 +21,9 @@
 
     <!-- Footer -->
     <footer class="relative z-10 py-10 border-t border-white/5 px-8">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+      <div class="max-w-7xl mx-auto flex justify-center items-center gap-8">
         <div class="text-white/20 text-[10px] uppercase tracking-[3px] font-bold">
           &copy; 2026 Suta Assist | Terminal Protocol V1.0
-        </div>
-        <div class="flex gap-8">
-          <a href="#" class="text-[10px] uppercase tracking-[2px] text-white/40 hover:text-white transition-colors">Privacy</a>
-          <a href="#" class="text-[10px] uppercase tracking-[2px] text-white/40 hover:text-white transition-colors">Terms</a>
-          <a href="#" class="text-[10px] uppercase tracking-[2px] text-white/40 hover:text-white transition-colors">Support</a>
         </div>
       </div>
     </footer>

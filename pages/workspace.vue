@@ -2,15 +2,16 @@
   <div class="h-screen w-screen bg-suta-black flex overflow-hidden font-sans text-white">
     <div 
       class="grid w-full h-full" 
-      :style="{ gridTemplateColumns: `${splitPercentage}% 1px auto` }"
+      :style="{ gridTemplateColumns: isAIPanelOpen ? `${splitPercentage}% 1px auto` : '100% 0px 0px' }"
     >
-      <!-- Video Area -->
+      <!-- Video & Terminal Area -->
       <section class="relative overflow-hidden">
-        <WorkspaceWorkspaceContainer />
+        <WorkspaceContainer />
       </section>
 
       <!-- Resizer (Vertical) -->
       <div 
+        v-if="isAIPanelOpen"
         class="w-[10px] ml-[-5px] cursor-col-resize z-10 flex items-center justify-center transition-all duration-300 group relative"
         @mousedown="startResizing"
       >
@@ -23,9 +24,9 @@
         </div>
       </div>
 
-      <!-- Terminal Area -->
-      <section class="bg-suta-dark-gray overflow-hidden">
-        <WorkspaceWorkspaceTerminalUnit />
+      <!-- AI Panel Area -->
+      <section v-if="isAIPanelOpen" class="bg-suta-dark-gray overflow-hidden">
+        <WorkspaceAIPanelUnit />
       </section>
     </div>
   </div>
@@ -33,8 +34,10 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useSuta } from '~/composables/useSuta'
 
-const splitPercentage = ref(65)
+const { isAIPanelOpen } = useSuta()
+const splitPercentage = ref(70)
 const isResizing = ref(false)
 
 const startResizing = (e) => {
