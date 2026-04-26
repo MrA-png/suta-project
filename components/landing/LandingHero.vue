@@ -15,7 +15,7 @@
         </h1>
 
         <p class="max-w-xl text-white/50 text-lg md:text-xl leading-relaxed mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-          Suta is a cognitive extension for technical interviews. Real-time transcription, AI-powered insights, and profile-synced coaching all in one seamless terminal.
+          Suta is an advanced AI whispering system for technical interviews. Real-time transcription, AI-powered insights, and profile-synced coaching all in one seamless terminal.
         </p>
 
         <div class="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
