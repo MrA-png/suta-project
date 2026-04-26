@@ -1,75 +1,91 @@
-# Nuxt Minimal Starter
+# Suta: AI The Secret Whisperer
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+<p align="center">
+  <img src="/icons/ai.svg" width="80" height="80" alt="Suta Logo" />
+</p>
 
-## Setup
+**Suta** is a high-performance, real-time AI whispering system designed as a cognitive companion for professionals across all industries. Operating through a sleek, terminal-inspired interface, Suta serves as a silent strategic coach that captures live audio streams—from high-stakes meetings to job interviews—and provides instantaneous, context-aware "whispers" tailored to the user’s specific identity.
 
-Make sure to install dependencies:
+## 🎯 Who is it for?
 
-```bash
-# npm
-npm install
+Thanks to its fully customizable **Neural Personality Engine**, Suta is a versatile tool for any professional navigating intense communication sessions:
 
-# pnpm
-pnpm install
+*   **Job Candidates & Interviewees**: Across any field who want to articulate their career highlights and pre-defined strategies with confidence.
+*   **Bilingual Professionals**: Specifically those operating in **English and Indonesian** environments. Suta provides a seamless bridge for users who need to process English technical dialogue and respond with Indonesian insights (or vice versa) in real-time.
 
-# yarn
-yarn install
+## 🧠 The Role of Artificial Intelligence
 
-# bun
-bun install
-```
+AI serves as the "neural core" of Suta, transforming live audio into actionable intelligence. The system utilizes a sophisticated multi-model pipeline to ensure sub-second response times:
 
-## Development Server
+1.  **Low-Latency Transcription**: Utilizing **Deepgram’s Nova-2** model, Suta achieves sub-second audio-to-text conversion, ensuring the AI captures every nuance of the live conversation.
+2.  **Strategic Reasoning**: Users can toggle between two high-performance models depending on the need:
+    *   **Gemini 2.0 Flash**: Optimized for extreme speed and efficiency in real-time response generation.
+    *   **OpenRouter (openai/gpt-oss-120b:free)**: Leveraged for deep reasoning and processing complex technical queries.
+3.  **Specialized Bilingual Synthesis**: The AI cross-references live dialogue with the user’s custom **JSON Personality Profile** to provide accurate whispers that are "one-take ready." Upon detecting 2 seconds of silence, Suta delivers paragraph-style responses in English or Indonesian, allowing users to remain composed and articulate without manual editing.
 
-Start the development server on `http://localhost:3000`:
+**Suta serves as your secret tactical advantage, whispering expert-level insights directly to your screen so you can navigate any high-stakes conversation with unshakeable confidence and perfect technical precision.**
 
-```bash
-# npm
-npm run dev
+---
 
-# pnpm
-pnpm dev
+## 🛠 Tech Stack
 
-# yarn
-yarn dev
+- **Frontend**: [Nuxt 3](https://nuxt.com/) (Vue.js)
+- **Styling**: Vanilla CSS & TailwindCSS (for utility layout)
+- **Transcription**: [Deepgram Nova-2](https://deepgram.com/)
+- **AI Models**: Google Gemini 2.0 Flash & OpenRouter API
+- **Icons**: Custom SVG System
+- **State Management**: Nuxt `useState` & LocalStorage
 
-# bun
-bun run dev
-```
+## 🚀 Getting Started
 
-## Production
+### Prerequisites
 
-Build the application for production:
+- Node.js (v18.x or later)
+- API Keys for Deepgram, Google Gemini, and OpenRouter
 
-```bash
-# npm
-npm run build
+### Installation
 
-# pnpm
-pnpm build
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/suta-project.git
+   ```
 
-# yarn
-yarn build
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-# bun
-bun run build
-```
+3. Setup Environment Variables:
+   Copy the example environment file and fill in your API keys:
+   ```bash
+   cp .env.example .env
+   ```
+   Or create a `.env` manually in the root directory:
+   ```env
+   # Deepgram: https://console.deepgram.com/
+   DEEPGRAM_API_KEY=your_deepgram_key
 
-Locally preview production build:
+   # Google AI Studio: https://aistudio.google.com/
+   GEMINI_API_KEY=your_gemini_key
 
-```bash
-# npm
-npm run preview
+   # Open Router: https://openrouter.ai/
+   OPENROUTER_API_KEY=your_openrouter_key
+   ```
 
-# pnpm
-pnpm preview
+4. Run the Development Server:
+   ```bash
+   npm run dev
+   ```
 
-# yarn
-yarn preview
+## 🔒 Security & Privacy
 
-# bun
-bun run preview
-```
+Suta is built with a **Privacy-First Architecture**:
+- **Zero-Server Persistence**: Your conversation history and Neural Profiles are stored locally in your browser's LocalStorage.
+- **Local Keys**: API keys are managed via environment variables and never stored on a centralized server.
+- **Purge Command**: Easily clear all session data with a single click in the terminal.
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+---
+
+<p align="center">
+  Built with technical excellence by <b>Suta Assist</b> &copy; 2026
+</p>
