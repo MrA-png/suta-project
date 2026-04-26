@@ -63,16 +63,16 @@
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-6 custom-scrollbar relative">
-      <!-- Metadata Row -->
-      <div class="flex items-center justify-between mb-6">
-        <!-- Clear History Button -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar relative">
+      <!-- Metadata Row (Sticky) -->
+      <div class="sticky top-0 z-30 flex items-center justify-between p-2 pb-2 bg-black/60 backdrop-blur-xl border-b border-white/5">
+        <!-- Clear Button -->
         <button 
           v-if="aiWhispers.length > 0"
           @click="aiWhispers = []"
           class="text-[8px] font-bold text-red-400/40 hover:text-red-400 uppercase tracking-widest transition-all"
         >
-          [ Clear History ]
+          [ Clear ]
         </button>
         <div v-else></div>
 
@@ -91,15 +91,15 @@
 
 
       <!-- Main Chat Flow -->
-      <div v-if="aiWhispers.length > 0 || isAnalyzing" class="space-y-6 pb-20">
+      <div v-if="aiWhispers.length > 0 || isAnalyzing" class="space-y-6 p-6 pt-2 pb-20">
         <!-- AI Content List -->
         <div 
           v-for="(item, idx) in aiWhispers" 
           :key="idx"
           class="animate-in fade-in slide-in-from-top-2 duration-500"
         >
-          <!-- User Query (If Manual) -->
-          <div v-if="item.type === 'manual'" class="flex justify-end mb-2">
+          <!-- Input Bubble (Manual Query or Auto Transcript) -->
+          <div v-if="item.query" class="flex justify-end mb-2">
             <div class="max-w-[85%] px-3 py-2 rounded-2xl bg-suta-cyan/10 border border-suta-cyan/20 text-white text-[12px] font-medium">
               {{ item.query }}
             </div>
@@ -141,6 +141,27 @@
                 <div v-for="i in 3" :key="i" class="w-1 h-1 bg-suta-cyan rounded-full animate-bounce" :style="{ animationDelay: i * 0.1 + 's' }"></div>
               </div>
               <span class="text-[8px] font-mono text-suta-cyan/50 uppercase tracking-[1px]">Synthesizing Whisper...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Real-time Monitor (Only in Auto Mode) -->
+        <div v-if="isAutoMode && (interimText || isListening) && isStreaming && !isAnalyzing" class="animate-in fade-in slide-in-from-right-2 duration-700">
+          <div class="flex justify-end items-center gap-3">
+            <div class="max-w-[90%] px-4 py-2 bg-suta-cyan/5 border border-suta-cyan/20 rounded-2xl flex flex-col items-end gap-1 group/live relative overflow-hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[7px] font-mono text-suta-cyan/60 uppercase tracking-[2px]">Live_Audio_Stream</span>
+                <div class="flex gap-0.5">
+                  <div v-for="i in 3" :key="i" class="w-[2px] h-[6px] bg-suta-cyan/40 animate-pulse" :style="{ animationDelay: i * 0.2 + 's' }"></div>
+                </div>
+              </div>
+              
+              <div v-if="interimText" class="text-[12px] text-white/60 italic font-medium leading-relaxed text-right transition-all">
+                {{ interimText }}<span class="animate-pulse">_</span>
+              </div>
+              <div v-else class="text-[9px] text-suta-cyan/30 italic font-mono uppercase tracking-widest animate-pulse">
+                Awaiting Audio Input...
+              </div>
             </div>
           </div>
         </div>
@@ -194,7 +215,7 @@ import { useSuta } from '../../composables/useSuta'
 
 // Explicitly extracting public config for the AI Unit
 const { public: config } = useRuntimeConfig()
-const { transcript, isAIPanelOpen, isStreaming, settings, personality, aiWhispers } = useSuta()
+const { transcript, interimText, isListening, isAIPanelOpen, isStreaming, settings, personality, aiWhispers } = useSuta()
 const isAnalyzing = ref(false)
 const isPersonalityModalOpen = ref(false)
 const isAutoMode = ref(true)
@@ -310,9 +331,12 @@ const performAIAnalysis = async (customQuery?: string) => {
     }
 
     // Append to history
+    const lastMsg = transcript.value[transcript.value.length - 1]
+    const autoQuery = lastMsg && lastMsg.speaker !== 'System' ? lastMsg.text : ''
+
     aiWhispers.value.push({
       type: customQuery ? 'manual' : 'auto',
-      query: customQuery,
+      query: customQuery || autoQuery,
       content,
       model: activeModel.value === 'gemini' ? geminiModel.value : openRouterModel.value,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })

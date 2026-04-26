@@ -211,13 +211,20 @@ const startCapture = async () => {
 
   try {
     const stream = await navigator.mediaDevices.getDisplayMedia({ 
-      video: { cursor: 'always' } as any, 
+      video: { 
+        cursor: 'always',
+        displaySurface: 'monitor',
+      } as any, 
       audio: {
         echoCancellation: false,
         noiseSuppression: false,
-        autoGainControl: false
-      }
-    })
+        autoGainControl: false,
+        suppressLocalAudioPlayback: false,
+      } as any,
+      systemAudio: 'include',
+      selfBrowserSurface: 'exclude',
+      surfaceSwitching: 'include'
+    } as any)
     
     activeStream.value = stream
     isStreaming.value = true
