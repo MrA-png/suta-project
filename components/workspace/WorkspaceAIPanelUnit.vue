@@ -76,10 +76,15 @@
         </button>
         <div v-else></div>
 
-        <!-- Identity Badge -->
-        <div class="px-2 py-1 rounded border border-suta-cyan/20 bg-suta-cyan/5 text-[8px] font-mono text-suta-cyan/50 uppercase tracking-tighter">
-          Profile: {{ personality?.identity?.nickname || 'Unknown' }} // Synced
-        </div>
+        <!-- Identity Badge (Syncable Button) -->
+        <button 
+          @click="syncPersonality"
+          class="px-2 py-1 rounded border border-suta-cyan/20 bg-suta-cyan/5 text-[8px] font-mono text-suta-cyan/50 uppercase tracking-tighter hover:bg-suta-cyan/10 hover:border-suta-cyan/40 transition-all flex items-center gap-2 group"
+          :class="{ 'animate-pulse text-suta-cyan border-suta-cyan/50': isSyncing }"
+        >
+          <div class="w-1 h-1 rounded-full bg-suta-cyan/40 group-hover:bg-suta-cyan" :class="{ 'animate-ping': isSyncing }"></div>
+          Profile: {{ personality?.identity?.nickname || 'Unknown' }} // {{ isSyncing ? 'Syncing...' : 'Synced' }}
+        </button>
       </div>
 
     <!-- Personality Modal -->
@@ -91,7 +96,7 @@
 
 
       <!-- Main Chat Flow -->
-      <div v-if="aiWhispers.length > 0 || isAnalyzing" class="space-y-6 p-6 pt-2 pb-20">
+      <div v-if="aiWhispers.length > 0 || isAnalyzing || (isAutoMode && isStreaming)" class="space-y-6 p-6 pt-2 pb-20">
         <!-- AI Content List -->
         <div 
           v-for="(item, idx) in aiWhispers" 
@@ -145,22 +150,41 @@
           </div>
         </div>
 
-        <!-- Live Real-time Monitor (Only in Auto Mode) -->
-        <div v-if="isAutoMode && (interimText || isListening) && isStreaming && !isAnalyzing" class="animate-in fade-in slide-in-from-right-2 duration-700">
+        <!-- Live Real-time Monitor (Standby System) -->
+        <div v-if="isAutoMode && isStreaming && !isAnalyzing" class="animate-in fade-in slide-in-from-right-2 duration-700">
           <div class="flex justify-end items-center gap-3">
-            <div class="max-w-[90%] px-4 py-2 bg-suta-cyan/5 border border-suta-cyan/20 rounded-2xl flex flex-col items-end gap-1 group/live relative overflow-hidden">
+            <div 
+              class="max-w-[90%] px-4 py-2 rounded-2xl flex flex-col items-end gap-1 group/live relative overflow-hidden transition-all duration-500"
+              :class="interimText ? 'bg-suta-cyan/10 border border-suta-cyan/30' : 'bg-white/[0.02] border border-white/5'"
+            >
+              <!-- Status Label -->
               <div class="flex items-center gap-2 mb-1">
-                <span class="text-[7px] font-mono text-suta-cyan/60 uppercase tracking-[2px]">Live_Audio_Stream</span>
-                <div class="flex gap-0.5">
-                  <div v-for="i in 3" :key="i" class="w-[2px] h-[6px] bg-suta-cyan/40 animate-pulse" :style="{ animationDelay: i * 0.2 + 's' }"></div>
+                <span 
+                  class="text-[7px] font-mono uppercase tracking-[2px] transition-colors"
+                  :class="interimText ? 'text-suta-cyan' : 'text-suta-muted/40'"
+                >
+                  {{ interimText ? 'Capturing_Active' : 'Neural_Standby' }}
+                </span>
+                <div class="flex gap-0.5 items-end h-[8px]">
+                  <div 
+                    v-for="i in 5" 
+                    :key="i" 
+                    class="w-[1.5px] rounded-full transition-all duration-300" 
+                    :class="interimText ? 'bg-suta-cyan animate-pulse' : 'bg-white/10'"
+                    :style="{ 
+                      height: interimText ? (Math.random() * 8 + 4) + 'px' : '2px',
+                      animationDelay: i * 0.1 + 's' 
+                    }"
+                  ></div>
                 </div>
               </div>
               
-              <div v-if="interimText" class="text-[12px] text-white/60 italic font-medium leading-relaxed text-right transition-all">
-                {{ interimText }}<span class="animate-pulse">_</span>
+              <!-- Text Area -->
+              <div v-if="interimText" class="text-[12px] text-white/80 italic font-medium leading-relaxed text-right transition-all">
+                {{ interimText }}<span class="animate-pulse text-suta-cyan">|</span>
               </div>
-              <div v-else class="text-[9px] text-suta-cyan/30 italic font-mono uppercase tracking-widest animate-pulse">
-                Awaiting Audio Input...
+              <div v-else class="text-[9px] text-white/10 font-mono uppercase tracking-[3px] py-1">
+                Awaiting Audio...
               </div>
             </div>
           </div>
@@ -221,23 +245,47 @@ const isPersonalityModalOpen = ref(false)
 const isAutoMode = ref(true)
 const manualInput = ref('')
 const pendingManualQuery = ref('')
-const activeModel = ref<'gemini' | 'openrouter'>('gemini')
+const activeModel = ref<'gemini' | 'openrouter'>('openrouter')
 const geminiModel = ref('gemini-2.5-flash')
 const openRouterModel = ref('openai/gpt-oss-120b:free')
+const isSyncing = ref(false)
+const lastProcessedIdx = ref(0) // Track processed messages for Auto Mode
+
+const syncPersonality = () => {
+  if (isSyncing.value) return
+  isSyncing.value = true
+  // Simulation of neural sync
+  setTimeout(() => {
+    isSyncing.value = false
+  }, 1500)
+}
 
 // Auto-Analysis Logic
 let autoWhisperTimeout: any = null
 
+// Block analysis if user is still talking
+watch(interimText, (newVal) => {
+  if (newVal && autoWhisperTimeout) {
+    clearTimeout(autoWhisperTimeout)
+    autoWhisperTimeout = null
+  }
+})
+
 watch(transcript, (newVal) => {
   if (!isStreaming.value || !isAutoMode.value || isAnalyzing.value) return
   
-  // Only trigger if we have new content (ignore system messages)
-  const lastMsg = newVal[newVal.length - 1]
-  if (lastMsg && lastMsg.speaker !== 'System') {
-    clearTimeout(autoWhisperTimeout)
-    autoWhisperTimeout = setTimeout(() => {
-      performAIAnalysis()
-    }, 4000)
+  // Only trigger if we have new messages since last processing
+  if (newVal.length > lastProcessedIdx.value) {
+    const newMessages = newVal.slice(lastProcessedIdx.value)
+    const hasRealContent = newMessages.some(m => m.speaker !== 'System')
+    
+    // Only start timeout if not currently receiving interim text
+    if (hasRealContent && !interimText.value) {
+      clearTimeout(autoWhisperTimeout)
+      autoWhisperTimeout = setTimeout(() => {
+        performAIAnalysis()
+      }, 2000) // 2s of true silence
+    }
   }
 }, { deep: true })
 
@@ -250,7 +298,7 @@ const formatAIResponse = (text: string) => {
 }
 
 const SUTA_WHISPERER_PROMPT = computed(() => {
-  const lang = settings.value.sourceLang.startsWith('id') ? 'id' : 'en'
+  const targetLanguageName = settings.value.targetLang === 'id' ? 'Indonesian' : 'English'
   
   return `
 You are the "SECRET WHISPERER", a personal job interview assistant acting as a "source person" or "coach" to help the user answer interview questions.
@@ -259,20 +307,21 @@ You have access to the following candidate's full profile:
 ${JSON.stringify(personality.value, null, 2)}
 
 Your Personality & Tone:
-1. TONE: Human-like, direct, and conversational. Avoid a "robotic" or overly formal AI assistant voice.
-2. LANGUAGE: You MUST respond in ${lang === "id" ? "Indonesian" : "English"}.
+1. TONE: Human-pro, conversational, and "one-take ready". Imagine a senior developer speaking naturally in an interview.
+2. LANGUAGE: You MUST respond in ${targetLanguageName}. Use natural phrasing (Indonesian: "Sebenarnya...", "Kalau dari sisi...", "Jadi gini...").
 3. PERSONA: You ARE the candidate. Speak in the first person ("I" or "Saya").
-4. BE CONCISE: Get straight to the point. Most people speak in short chunks (2-3 sentences). Don't give long-winded explanations unless specifically asked for a deep dive.
-5. NO PLACEHOLDERS: Don't say "[Nama Perusahaan]" or "[Tahun]". If the data isn't in the persona, use the "Honest Learning" philosophy: be honest that you're currently learning/adapting to it.
+4. BE CONCISE: Complete, but compact. 2-4 sentences max per whisper. High impact, zero fluff.
+5. NO AI-FORMATTING: NEVER use bullet points or numbered lists in the SUGGESTED_WHISPER. Write in natural paragraphs.
 
 Guidelines:
-1. Don't sound like a textbook. Sound like a senior developer talking to a colleague or an interviewer.
-2. Use specific data (Mertani, Pubmedia, Siber Integrasi) naturally. Instead of "I have experience in X," say "During my time at Siber Integrasi, I handled X..."
-3. If the transcript contains a question, focus entirely on providing a ready-to-use answer that the user can read aloud naturally.
+1. RADICAL HONESTY: NEVER lie. If it's not in the JSON, don't say it. Stick to the projects listed.
+2. PLUG-AND-PLAY: The user must be able to read your response EXACTLY as written. No placeholders, no [brackets], no "..." gaps.
+3. SENIORITY: Sound like a confident professional. Use technical terms naturally without over-explaining like a textbook.
+4. STRATEGY: If the interviewer's question is vague, answer based on your strongest project in the profile.
 
 OUTPUT STRUCTURE:
-- ### SUGGESTED_WHISPER: The ready-to-read answer.
-- ### STRATEGIC_TIP: One quick tip on how to deliver the answer or what to emphasize next.
+- ### SUGGESTED_WHISPER: The ready-to-read answer (No lists, just natural flow).
+- ### STRATEGIC_TIP: One quick tip on delivery or body language.
 `
 })
 
@@ -292,10 +341,22 @@ const performAIAnalysis = async (customQuery?: string) => {
   }
 
   try {
-    const currentContext = transcript.value.map((m: any) => `[${m.speaker}]: ${m.translation || m.text}`).join('\n')
+    const allMessages = transcript.value
+    const newMessages = customQuery ? [] : allMessages.slice(lastProcessedIdx.value)
+    
+    // Skip if no new content in auto mode
+    if (!customQuery && newMessages.length === 0) {
+      isAnalyzing.value = false
+      return
+    }
+
+    const currentContext = allMessages.map((m: any) => `[${m.speaker}]: ${m.text}`).join('\n')
+    const triggeringContext = newMessages.map(m => m.text).join(' ')
+    const recentWhispers = aiWhispers.value.slice(-3).map(w => `[PREVIOUS_WHISPER]: ${w.content}`).join('\n')
+
     const finalPrompt = customQuery 
-      ? `USER_QUERY: ${customQuery}\n\nCONTEXT:\n${currentContext}`
-      : `TRANSCRIPT_TO_ANALYZE:\n${currentContext}`
+      ? `USER_QUERY: ${customQuery}\n\nFULL_CONTEXT:\n${currentContext}\n\n${recentWhispers}`
+      : `LATEST_TRANSCRIPT_SEGMENT:\n${triggeringContext}\n\nCONVERSATION_HISTORY:\n${currentContext}\n\n${recentWhispers}\n\nNote: The speaker just continued talking. Ensure your new whisper is coherent with previous whispers.`
     
     let endpoint = ''
     let headers: any = { 'Content-Type': 'application/json' }
@@ -331,16 +392,26 @@ const performAIAnalysis = async (customQuery?: string) => {
     }
 
     // Append to history
-    const lastMsg = transcript.value[transcript.value.length - 1]
-    const autoQuery = lastMsg && lastMsg.speaker !== 'System' ? lastMsg.text : ''
+    // Aggregate all messages that triggered this analysis into one context bubble
+    const aggregatedNewContext = customQuery 
+      ? customQuery 
+      : transcript.value.slice(lastProcessedIdx.value)
+          .filter(m => m.speaker !== 'System')
+          .map(m => m.text)
+          .join(' ')
 
     aiWhispers.value.push({
       type: customQuery ? 'manual' : 'auto',
-      query: customQuery || autoQuery,
+      query: aggregatedNewContext,
       content,
       model: activeModel.value === 'gemini' ? geminiModel.value : openRouterModel.value,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     })
+
+    // Update processed index if this was an auto-whisper
+    if (!customQuery) {
+      lastProcessedIdx.value = transcript.value.length
+    }
 
     pendingManualQuery.value = ''
     scrollToBottom()

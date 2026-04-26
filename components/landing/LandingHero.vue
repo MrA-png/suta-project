@@ -30,14 +30,30 @@
 
       <!-- Right Column: ASCII Silhouette -->
       <div class="flex-1 hidden md:flex justify-end items-center pr-2 animate-in fade-in zoom-in duration-1000 delay-700">
-        <div class="relative group">
+        <div class="relative group" @mouseenter="triggerScramble">
           <!-- Glow Effect (Outside) -->
           <div class="absolute inset-0 bg-suta-cyan/20 blur-[100px] rounded-full group-hover:bg-suta-cyan/30 transition-all duration-700"></div>
           
           <!-- Tightly wrapped container for ASCII + Scan -->
           <div class="relative overflow-hidden rounded-lg">
-            <pre class="relative select-none group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-500 whitespace-pre drop-shadow-[0_0_15px_rgba(0,240,255,0.4)] opacity-80 ascii-art text-suta-cyan leading-[1.1] text-[8px] font-bold pr-10">
-          ....................................................................................................
+            <pre class="relative select-none group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-500 whitespace-pre drop-shadow-[0_0_15px_rgba(0,240,255,0.4)] opacity-80 ascii-art text-suta-cyan leading-[1.1] text-[8px] font-bold pr-10">{{ displayedAscii }}</pre>
+
+            <!-- Scanning Line (Now constrained by overflow-hidden parent) -->
+            <div class="absolute top-0 inset-x-0 h-[80px] bg-gradient-to-b from-transparent via-suta-cyan/30 to-transparent animate-scan pointer-events-none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features, Workflow, etc. go here -->
+    <slot />
+  </main>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const ORIGINAL_ASCII = `          ....................................................................................................
           ....................................................................................................
           ....................................................................................................
           ....................................................................................................
@@ -90,20 +106,45 @@
           %%%@%@@@%@@%@@%%@@@@%%%%%@@@@@@%%%@@@@@@%@%@@@@@@%%%@%%%%%%%%@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
           @%%@@@%@@@%@@@@%@@@@@%%%%@@@@@%%%%@@@@@@%@@%@@@%%%%@@%%%%%@%%@@%%%%%%%%%%%%@%@%%%%%%%%%%%%%%%%%%%%%%
           @@%%@%@@@@@%@@@@@@@@@%%%%%@@@@%%%%@@@@@@@@%@@@%@@%@@@@%%%%%%%%%%@%@%%%%%%%%@@@@@@@@@%%%%%%%@%@%%@%@@
-          @@@@@@%%@@@@%@@@@@@@@@@%@@@@@%%@@@@@@@@@%@@@@@@@%%@@@@%%%%%%%%%%%%@@@%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@
-            </pre>
+          @@@@@@%%@@@@%@@@@@@@@@@%@@@@@%%@@@@@@@@@%@@@@@@@%%@@@@%%%%%%%%%%%%@@@%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@`
 
-            <!-- Scanning Line (Now constrained by overflow-hidden parent) -->
-            <div class="absolute top-0 inset-x-0 h-[80px] bg-gradient-to-b from-transparent via-suta-cyan/30 to-transparent animate-scan pointer-events-none"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+const displayedAscii = ref('')
+const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?'
+let interval: any = null
 
-    <!-- Features, Workflow, etc. go here -->
-    <slot />
-  </main>
-</template>
+const triggerScramble = () => {
+  if (interval) clearInterval(interval)
+  
+  const target = ORIGINAL_ASCII.split('')
+  const current = target.map(c => (c === '\n' || c === ' ') ? c : scrambleChars[Math.floor(Math.random() * scrambleChars.length)])
+  displayedAscii.value = current.join('')
+
+  let frame = 0
+  const totalFrames = 30
+  interval = setInterval(() => {
+    frame++
+    const progress = frame / totalFrames
+    
+    const next = target.map((char, i) => {
+      if (char === '\n' || char === ' ') return char
+      if (Math.random() < progress) return char
+      return scrambleChars[Math.floor(Math.random() * scrambleChars.length)]
+    })
+    
+    displayedAscii.value = next.join('')
+    
+    if (frame >= totalFrames) {
+      displayedAscii.value = ORIGINAL_ASCII
+      clearInterval(interval)
+      interval = null
+    }
+  }, 30)
+}
+
+onMounted(() => {
+  triggerScramble()
+})
+</script>
 
 <style scoped>
 @keyframes scan {

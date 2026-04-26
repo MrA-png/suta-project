@@ -29,18 +29,16 @@
       </div>
       
       <div class="mt-8 flex justify-end">
-        <button 
-          @click="showDocs = true"
+        <NuxtLink 
+          to="/docs"
+          target="_blank"
           class="flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-md text-suta-muted text-[10px] font-medium tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300 uppercase"
         >
           <div class="w-3 h-3 bg-current [mask-image:url(/icons/info.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
           VIEW FULL DOCS
-        </button>
+        </NuxtLink>
       </div>
     </div>
-
-    <!-- Full Documentation Modal -->
-    <WorkspaceModalsDocs :show="showDocs" @close="showDocs = false" />
   </div>
 </template>
 
@@ -50,7 +48,6 @@ import { useSuta } from '~/composables/useSuta'
 
 const { currentStatus } = useSuta()
 const isOpen = ref(true)
-const showDocs = ref(false)
 const fullText = "Welcome to Suta.\n\nTo begin:\n1. Click 'Change Source'.\n2. Select your Meet/Zoom tab.\n3. Enable 'Share tab audio'.\n\nSuta will start assisting instantly."
 const displayedText = ref('')
 
