@@ -1,7 +1,7 @@
 # Suta: AI The Secret Whisperer
 
 <p align="center">
-  <img src="/icons/ai.svg" width="80" height="80" alt="Suta Logo" />
+  <img src="assets/logo/suta-logo.png" width="120" height="120" alt="Suta Logo" />
 </p>
 
 **Suta** is a high-performance, real-time AI whispering system designed as a cognitive companion for professionals across all industries. Operating through a sleek, terminal-inspired interface, Suta serves as a silent strategic coach that captures live audio streams—from high-stakes meetings to job interviews—and provides instantaneous, context-aware "whispers" tailored to the user’s specific identity.
