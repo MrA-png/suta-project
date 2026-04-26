@@ -87,5 +87,5 @@ Suta is built with a **Privacy-First Architecture**:
 ---
 
 <p align="center">
-  Built with technical excellence by <b>Suta Assist</b> &copy; 2026
+  Built with technical excellence by <b>Suta Assist</b> &copy; MrA-png
 </p>
