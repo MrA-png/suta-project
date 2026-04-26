@@ -299,7 +299,6 @@
       </div>
     </footer>
 
-    <GlitchCursor />
   </div>
 </template>
 

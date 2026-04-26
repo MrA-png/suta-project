@@ -38,8 +38,19 @@
           <div class="relative overflow-hidden rounded-lg">
             <pre class="relative select-none group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-500 whitespace-pre drop-shadow-[0_0_15px_rgba(0,240,255,0.4)] opacity-80 ascii-art text-suta-cyan leading-[1.1] text-[8px] font-bold pr-10">{{ displayedAscii }}</pre>
 
-            <!-- Scanning Line (Now constrained by overflow-hidden parent) -->
+            <!-- Scanning Line -->
             <div class="absolute top-0 inset-x-0 h-[80px] bg-gradient-to-b from-transparent via-suta-cyan/30 to-transparent animate-scan pointer-events-none"></div>
+            
+            <!-- Live Camera Button Overlay -->
+            <div class="absolute bottom-4 left-0 right-0 flex justify-center transition-opacity duration-500">
+              <button 
+                @click="isCameraActive ? stopCamera() : startCamera()"
+                class="px-4 py-2 bg-black/60 backdrop-blur-md border border-suta-cyan/30 text-suta-cyan font-bold text-[9px] uppercase tracking-[3px] rounded-full hover:bg-suta-cyan hover:text-black transition-all flex items-center gap-2"
+              >
+                <span class="w-1.5 h-1.5 rounded-full" :class="isCameraActive ? 'bg-red-500 animate-pulse' : 'bg-suta-cyan'"></span>
+                {{ isCameraActive ? 'Stop Live Feed' : 'Live Camera' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -109,36 +120,110 @@ const ORIGINAL_ASCII = `          ..............................................
           @@@@@@%%@@@@%@@@@@@@@@@%@@@@@%%@@@@@@@@@%@@@@@@@%%@@@@%%%%%%%%%%%%@@@%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@`
 
 const displayedAscii = ref('')
+const isCameraActive = ref(false)
+const videoRef = ref<HTMLVideoElement | null>(null)
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+let stream: MediaStream | null = null
+let animationFrameId: number | null = null
+
+// ASCII Character set for mapping brightness (Dark to Light)
+const ASCII_CHARS = '@%#*+=-:. '
+const COLS = 110 
+const ROWS = 54  
+
+const startCamera = async () => {
+  try {
+    triggerScramble()
+    
+    stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { width: COLS * 8, height: ROWS * 16, facingMode: 'user' } 
+    })
+    
+    if (!videoRef.value) videoRef.value = document.createElement('video')
+    videoRef.value.srcObject = stream
+    videoRef.value.play()
+    
+    setTimeout(() => {
+      isCameraActive.value = true
+      if (!canvasRef.value) canvasRef.value = document.createElement('canvas')
+      renderFrame()
+    }, 500)
+    
+  } catch (err) {
+    console.error("Camera access denied:", err)
+    isCameraActive.value = false
+    displayedAscii.value = ORIGINAL_ASCII
+  }
+}
+
+const stopCamera = () => {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop())
+    stream = null
+  }
+  if (animationFrameId) cancelAnimationFrame(animationFrameId)
+  isCameraActive.value = false
+  triggerScramble()
+}
+
+const renderFrame = () => {
+  if (!isCameraActive.value || !videoRef.value || !canvasRef.value) return
+
+  const canvas = canvasRef.value
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (!ctx) return
+
+  canvas.width = COLS
+  canvas.height = ROWS
+
+  ctx.drawImage(videoRef.value, 0, 0, COLS, ROWS)
+  const pixels = ctx.getImageData(0, 0, COLS, ROWS).data
+  let asciiImage = ''
+
+  for (let y = 0; y < ROWS; y++) {
+    asciiImage += '          ' // Match 10 leading spaces of ORIGINAL_ASCII
+    for (let x = 0; x < COLS; x++) {
+      const idx = (y * COLS + x) * 4
+      const r = pixels[idx]
+      const g = pixels[idx+1]
+      const b = pixels[idx+2]
+      const brightness = (r + g + b) / 3
+      const charIdx = Math.floor((brightness / 255) * (ASCII_CHARS.length - 1))
+      asciiImage += ASCII_CHARS[charIdx]
+    }
+    asciiImage += '\n'
+  }
+
+  displayedAscii.value = asciiImage
+  animationFrameId = requestAnimationFrame(renderFrame)
+}
+
 const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?'
-let interval: any = null
+let scrambleInterval: any = null
 
 const triggerScramble = () => {
-  if (interval) clearInterval(interval)
+  if (isCameraActive.value) return
+  if (scrambleInterval) clearInterval(scrambleInterval)
   
   const target = ORIGINAL_ASCII.split('')
-  const current = target.map(c => (c === '\n' || c === ' ') ? c : scrambleChars[Math.floor(Math.random() * scrambleChars.length)])
-  displayedAscii.value = current.join('')
-
   let frame = 0
-  const totalFrames = 30
-  interval = setInterval(() => {
+  const totalFrames = 20
+  
+  scrambleInterval = setInterval(() => {
     frame++
     const progress = frame / totalFrames
-    
-    const next = target.map((char, i) => {
+    const next = target.map((char) => {
       if (char === '\n' || char === ' ') return char
       if (Math.random() < progress) return char
       return scrambleChars[Math.floor(Math.random() * scrambleChars.length)]
     })
     
     displayedAscii.value = next.join('')
-    
     if (frame >= totalFrames) {
       displayedAscii.value = ORIGINAL_ASCII
-      clearInterval(interval)
-      interval = null
+      clearInterval(scrambleInterval)
     }
-  }, 30)
+  }, 40)
 }
 
 onMounted(() => {
