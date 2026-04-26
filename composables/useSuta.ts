@@ -20,6 +20,14 @@ export interface SutaSettings {
   isTranslatorEnabled: boolean;
 }
 
+export interface AIWhisper {
+  type: 'auto' | 'manual';
+  query?: string;
+  content: string;
+  timestamp: string;
+  model: string;
+}
+
 export interface Personality {
   identity: {
     full_name: string;
@@ -48,6 +56,7 @@ export const useSuta = () => {
   }))
 
   const personality = useState<Personality | null>('suta-personality', () => null)
+  const aiWhispers = useState<AIWhisper[]>('suta-ai-whispers', () => [])
 
   // Persistence Logic
   onMounted(async () => {
@@ -55,6 +64,12 @@ export const useSuta = () => {
     const savedHistory = localStorage.getItem('suta_history')
     if (savedHistory) {
       history.value = JSON.parse(savedHistory)
+    }
+
+    // Load AI Whispers
+    const savedWhispers = localStorage.getItem('suta_ai_whispers')
+    if (savedWhispers) {
+      aiWhispers.value = JSON.parse(savedWhispers)
     }
 
     // Load Personality
@@ -125,6 +140,11 @@ export const useSuta = () => {
     interimText.value = text
   }
 
+  // Persistence for AI Whispers
+  watch(aiWhispers, (newVal) => {
+    localStorage.setItem('suta_ai_whispers', JSON.stringify(newVal))
+  }, { deep: true })
+
   return { 
     transcript, 
     interimText, 
@@ -135,6 +155,7 @@ export const useSuta = () => {
     history,
     personality,
     isAIPanelOpen,
+    aiWhispers,
     addMessage, 
     setInterim,
     clearTranscript,

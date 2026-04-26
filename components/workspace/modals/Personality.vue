@@ -16,23 +16,30 @@
           @input="validateJson"
         ></textarea>
       </div>
-
-      <div class="flex gap-3">
+      <div class="flex gap-3 pt-2">
         <button 
           @click="resetToDefault"
-          class="flex-1 py-3 bg-white/5 border border-white/10 text-suta-muted font-bold text-[11px] rounded hover:bg-white/10 transition-colors uppercase tracking-[1px]"
+          class="flex-1 py-3 bg-white/5 border border-white/10 text-suta-muted font-bold text-[11px] rounded hover:bg-white/10 transition-colors uppercase tracking-[1px] shadow-none"
         >
           Reset to Default
         </button>
         <button 
           @click="savePersonality"
           :disabled="!!error"
-          class="flex-[2] py-3 bg-suta-cyan text-suta-black font-bold text-[11px] rounded hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-all uppercase tracking-[2px]"
+          class="flex-[2] py-3 bg-suta-cyan/20 text-suta-cyan font-bold text-[11px] border border-suta-cyan/30 rounded hover:bg-suta-cyan hover:text-black transition-all uppercase tracking-[2px] disabled:opacity-30"
         >
           Inject Personality
         </button>
       </div>
     </div>
+    <template #footer>
+      <button 
+        @click="$emit('close')" 
+        class="w-full py-3 bg-white/5 text-white font-bold text-[11px] border border-white/10 rounded hover:bg-white hover:text-black transition-all uppercase tracking-[2px]"
+      >
+        Close
+      </button>
+    </template>
   </UiBaseModal>
 
   <!-- Reset Confirmation -->
