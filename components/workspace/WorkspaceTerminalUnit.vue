@@ -55,7 +55,6 @@
       </button>
 
       <div class="flex-1 p-6 overflow-y-auto terminal-content-area custom-scrollbar" ref="transcriptionRef">
-        <!-- Message History -->
         <WorkspaceMessage 
           v-for="(msg, index) in transcript" 
           :key="index"
@@ -65,24 +64,13 @@
           :target-lang="settings.targetLang"
         />
 
-        <!-- LIVE INTERIM TEXT -->
-        <div v-if="interimText" class="mb-6 opacity-70 animate-pulse">
-          <div class="flex items-center gap-2 mb-1">
-            <span class="text-[10px] font-bold text-suta-cyan uppercase tracking-[2px]">LIVE CAPTION</span>
-          </div>
-          <p class="text-white text-[14px] leading-relaxed italic">
-            {{ interimText }}<span class="inline-block w-1 h-4 bg-suta-cyan ml-1 align-middle"></span>
-          </p>
-        </div>
+        <TerminalLiveCaption :text="interimText" />
       </div>
-
     </div>
 
     <!-- Modals -->
     <WorkspaceModalsHistory :show="showHistory" @close="showHistory = false" />
     <WorkspaceModalsSettings :show="showSettings" @close="showSettings = false" />
-
-    <!-- Reset Confirmation Dialog -->
     <UiBaseConfirmation 
       :show="showResetConfirm"
       title="END SESSION?"
@@ -95,36 +83,36 @@
     />
   </div>
 </template>
-
-<script setup>
+<script setup lang="ts">
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useSuta } from '../../composables/useSuta'
 
-const { transcript, interimText, currentStatus: status, isListening, settings, isAIPanelOpen, clearTranscript } = useSuta()
+const { transcript, interimText, isListening, settings, isAIPanelOpen, clearTranscript } = useSuta()
 
 const showSettings = ref(false)
 const showHistory = ref(false)
 const showResetConfirm = ref(false)
-const transcriptionRef = ref(null)
-const headerRef = ref(null)
+const transcriptionRef = ref<HTMLElement | null>(null)
+const headerRef = ref<HTMLElement | null>(null)
 const headerWidth = ref(0)
-
-let resizeObserver = null
+const resizeObserver = ref<ResizeObserver | null>(null)
 
 onMounted(() => {
   if (headerRef.value) {
-    resizeObserver = new ResizeObserver((entries) => {
+    resizeObserver.value = new ResizeObserver((entries) => {
       for (const entry of entries) {
         headerWidth.value = entry.contentRect.width
       }
     })
-    resizeObserver.observe(headerRef.value.parentElement)
+    if (headerRef.value.parentElement) {
+      resizeObserver.value.observe(headerRef.value.parentElement)
+    }
   }
 })
 
 onUnmounted(() => {
-  if (resizeObserver) {
-    resizeObserver.disconnect()
+  if (resizeObserver.value) {
+    resizeObserver.value.disconnect()
   }
 })
 
@@ -146,9 +134,7 @@ watch(interimText, (newText) => {
 </script>
 
 <style scoped>
-.terminal-content-area {
-  scroll-behavior: smooth;
-}
+.terminal-content-area { scroll-behavior: smooth; }
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }

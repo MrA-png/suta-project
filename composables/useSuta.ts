@@ -57,6 +57,7 @@ export const useSuta = () => {
 
   const personality = useState<Personality | null>('suta-personality', () => null)
   const aiWhispers = useState<AIWhisper[]>('suta-ai-whispers', () => [])
+  const lastProcessedIdx = useState('suta-last-idx', () => 0)
 
   // Persistence Logic
   onMounted(async () => {
@@ -156,6 +157,7 @@ export const useSuta = () => {
     personality,
     isAIPanelOpen,
     aiWhispers,
+    lastProcessedIdx,
     addMessage, 
     setInterim,
     clearTranscript,

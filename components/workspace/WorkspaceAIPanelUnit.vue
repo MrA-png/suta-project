@@ -1,10 +1,10 @@
 <template>
   <div class="h-full bg-suta-dark-gray border-t border-suta-border flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500">
+    <!-- Header -->
     <div 
       ref="headerRef"
       class="px-6 py-3 border-b border-white/5 flex flex-col gap-3 bg-black/20 transition-all duration-300 relative"
     >
-      <!-- Top Row: Brand & Close -->
       <div class="flex items-center justify-between w-full">
         <div class="flex items-center gap-2 flex-shrink-0">
           <template v-if="panelWidth < 300">
@@ -16,19 +16,12 @@
             Secret Whisperer Mode
           </span>
         </div>
-        <button 
-          @click="isAIPanelOpen = false" 
-          class="text-suta-muted hover:text-white transition-colors p-1"
-        >
+        <button @click="isAIPanelOpen = false" class="text-suta-muted hover:text-white transition-colors p-1">
           <div class="w-4 h-4 bg-current [mask-image:url(/icons/close.svg)] [mask-size:contain] [mask-repeat:no-repeat]"></div>
         </button>
       </div>
       
-      <!-- Bottom Row: Controls -->
-      <div 
-        class="flex gap-2 items-center"
-        :class="panelWidth < 350 ? 'justify-between' : 'justify-start'"
-      >
+      <div class="flex gap-2 items-center" :class="panelWidth < 350 ? 'justify-between' : 'justify-start'">
         <!-- Model Selector -->
         <div class="flex items-center bg-white/5 rounded-full p-0.5 border border-white/10 flex-shrink-0">
           <button 
@@ -42,16 +35,11 @@
           </button>
         </div>
 
-        <!-- Personality Settings Button -->
-        <button 
-          @click="isPersonalityModalOpen = true"
-          class="px-3 py-1.5 rounded bg-white/5 border border-white/10 hover:bg-white/10 hover:border-suta-cyan/30 transition-all group flex items-center gap-2 flex-shrink-0"
-        >
+        <button @click="isPersonalityModalOpen = true" class="px-3 py-1.5 rounded bg-white/5 border border-white/10 hover:bg-white/10 hover:border-suta-cyan/30 transition-all group flex items-center gap-2 flex-shrink-0">
           <span v-if="panelWidth > 350" class="text-[8px] font-bold text-suta-muted group-hover:text-white uppercase tracking-widest">Neural Profile</span>
           <span v-else class="text-[8px] font-bold text-suta-cyan uppercase tracking-tighter">Profile</span>
         </button>
 
-        <!-- Auto Mode Toggle -->
         <button 
           @click="isAutoMode = !isAutoMode"
           class="px-3 py-1.5 rounded transition-all flex items-center gap-2 border flex-shrink-0"
@@ -63,10 +51,10 @@
       </div>
     </div>
 
+    <!-- Content -->
     <div class="flex-1 overflow-y-auto custom-scrollbar relative">
-      <!-- Metadata Row (Sticky) -->
+      <!-- Sticky Info Row -->
       <div class="sticky top-0 z-30 flex items-center justify-between p-2 pb-2 bg-black/60 backdrop-blur-xl border-b border-white/5">
-        <!-- Clear Button -->
         <button 
           v-if="aiWhispers.length > 0"
           @click="aiWhispers = []"
@@ -76,7 +64,6 @@
         </button>
         <div v-else></div>
 
-        <!-- Identity Badge (Syncable Button) -->
         <button 
           @click="syncPersonality"
           class="px-2 py-1 rounded border border-suta-cyan/20 bg-suta-cyan/5 text-[8px] font-mono text-suta-cyan/50 uppercase tracking-tighter hover:bg-suta-cyan/10 hover:border-suta-cyan/40 transition-all flex items-center gap-2 group"
@@ -87,50 +74,16 @@
         </button>
       </div>
 
-    <!-- Personality Modal -->
-    <WorkspaceModalsPersonality 
-      :show="isPersonalityModalOpen" 
-      @close="isPersonalityModalOpen = false" 
-    />
-
-
-
-      <!-- Main Chat Flow -->
-      <div v-if="aiWhispers.length > 0 || isAnalyzing || (isAutoMode && isStreaming)" class="space-y-6 p-6 pt-2 pb-20">
-        <!-- AI Content List -->
-        <div 
+      <!-- Chat Flow -->
+      <div v-if="aiWhispers.length > 0 || isAnalyzing || (isAutoMode && isStreaming)" class="p-6 pt-2 pb-20">
+        <AIPanelWhisperCard 
           v-for="(item, idx) in aiWhispers" 
           :key="idx"
-          class="animate-in fade-in slide-in-from-top-2 duration-500"
-        >
-          <!-- Input Bubble (Manual Query or Auto Transcript) -->
-          <div v-if="item.query" class="flex justify-end mb-2">
-            <div class="max-w-[85%] px-3 py-2 rounded-2xl bg-suta-cyan/10 border border-suta-cyan/20 text-white text-[12px] font-medium">
-              {{ item.query }}
-            </div>
-          </div>
+          :whisper="item"
+        />
 
-          <!-- AI Response -->
-          <div class="bg-white/[0.03] border border-white/10 p-5 rounded-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-suta-cyan/5 blur-3xl pointer-events-none group-hover:bg-suta-cyan/10 transition-all"></div>
-            
-            <div class="relative z-10">
-              <div class="flex items-center gap-2 mb-4 opacity-50">
-                <span class="text-[8px] font-mono text-suta-cyan italic">{{ item.type === 'auto' ? 'AUTO_WHISPER' : 'MANUAL_QUERY' }}</span>
-                <div class="h-[1px] flex-1 bg-suta-cyan/10"></div>
-                <span class="text-[8px] font-mono text-suta-muted uppercase mr-2 opacity-50">{{ item.model }}</span>
-                <span class="text-[8px] font-mono text-suta-muted">{{ item.timestamp }}</span>
-              </div>
-              
-              <div class="prose prose-invert max-w-none">
-                <div class="text-[13px] text-white/90 leading-relaxed whitespace-pre-wrap font-sans space-y-4" v-html="formatAIResponse(item.content)"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pending Manual Query (Shown during analysis) -->
-        <div v-if="isAnalyzing && pendingManualQuery" class="animate-in fade-in slide-in-from-top-1 duration-300">
+        <!-- Pending Manual Query -->
+        <div v-if="isAnalyzing && pendingManualQuery" class="animate-in fade-in slide-in-from-top-1 duration-300 mb-6">
           <div class="flex justify-end">
             <div class="max-w-[85%] px-3 py-2 rounded-2xl bg-suta-cyan/10 border border-suta-cyan/20 text-white text-[12px] font-medium shadow-lg shadow-suta-cyan/5">
               {{ pendingManualQuery }}
@@ -150,63 +103,19 @@
           </div>
         </div>
 
-        <!-- Live Real-time Monitor (Standby System) -->
-        <div v-if="isAutoMode && isStreaming && !isAnalyzing" class="animate-in fade-in slide-in-from-right-2 duration-700">
-          <div class="flex justify-end items-center gap-3">
-            <div 
-              class="max-w-[90%] px-4 py-2 rounded-2xl flex flex-col items-end gap-1 group/live relative overflow-hidden transition-all duration-500"
-              :class="interimText ? 'bg-suta-cyan/10 border border-suta-cyan/30' : 'bg-white/[0.02] border border-white/5'"
-            >
-              <!-- Status Label -->
-              <div class="flex items-center gap-2 mb-1">
-                <span 
-                  class="text-[7px] font-mono uppercase tracking-[2px] transition-colors"
-                  :class="interimText ? 'text-suta-cyan' : 'text-suta-muted/40'"
-                >
-                  {{ interimText ? 'Capturing_Active' : 'Neural_Standby' }}
-                </span>
-                <div class="flex gap-0.5 items-end h-[8px]">
-                  <div 
-                    v-for="i in 5" 
-                    :key="i" 
-                    class="w-[1.5px] rounded-full transition-all duration-300" 
-                    :class="interimText ? 'bg-suta-cyan animate-pulse' : 'bg-white/10'"
-                    :style="{ 
-                      height: interimText ? (Math.random() * 8 + 4) + 'px' : '2px',
-                      animationDelay: i * 0.1 + 's' 
-                    }"
-                  ></div>
-                </div>
-              </div>
-              
-              <!-- Text Area -->
-              <div v-if="interimText" class="text-[12px] text-white/80 italic font-medium leading-relaxed text-right transition-all">
-                {{ interimText }}<span class="animate-pulse text-suta-cyan">|</span>
-              </div>
-              <div v-else class="text-[9px] text-white/10 font-mono uppercase tracking-[3px] py-1">
-                Awaiting Audio...
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Live Real-time Monitor -->
+        <AIPanelMonitor 
+          v-if="isAutoMode && isStreaming && !isAnalyzing" 
+          :interim-text="interimText"
+        />
       </div>
       
       <!-- Empty State -->
       <div v-else class="py-12 text-center">
-        <div v-if="!isAutoMode" class="flex flex-col items-center gap-3 opacity-40">
-          <p class="text-[10px] text-suta-cyan uppercase tracking-[2px] italic">Manual Mode Active: Ready for Queries</p>
-        </div>
-        <div v-else-if="!isStreaming" class="flex flex-col items-center gap-3 opacity-40">
-          <p class="text-[10px] text-suta-muted uppercase tracking-[2px] italic">Source Offline: Waiting for Connection...</p>
-        </div>
+        <p v-if="!isAutoMode" class="text-[10px] text-suta-cyan uppercase tracking-[2px] italic opacity-40">Manual Mode Active: Ready for Queries</p>
+        <p v-else-if="!isStreaming" class="text-[10px] text-suta-muted uppercase tracking-[2px] italic opacity-40">Source Offline: Waiting for Connection...</p>
         <p v-else class="text-[10px] text-suta-muted uppercase tracking-[2px] opacity-30 italic">Whisperer Unit Standing By...</p>
       </div>
-
-    <!-- Personality Modal -->
-    <WorkspaceModalsPersonality 
-      :show="isPersonalityModalOpen" 
-      @close="isPersonalityModalOpen = false" 
-    />
     </div>
 
     <!-- Manual Input Bar -->
@@ -228,42 +137,34 @@
       </form>
     </div>
 
-    <!-- Quick Start Guide (Moved from Terminal) -->
+    <!-- Guide & Modals -->
+    <WorkspaceModalsPersonality :show="isPersonalityModalOpen" @close="isPersonalityModalOpen = false" />
     <WorkspaceGuide />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useSuta } from '../../composables/useSuta'
+import { useAIWhisperer } from '../../composables/useAIWhisperer'
 
-// Explicitly extracting public config for the AI Unit
-const { public: config } = useRuntimeConfig()
-const { transcript, interimText, isListening, isAIPanelOpen, isStreaming, settings, personality, aiWhispers } = useSuta()
-const isAnalyzing = ref(false)
+const { transcript, interimText, isAIPanelOpen, isStreaming, personality, aiWhispers } = useSuta()
+const { isAnalyzing, activeModel, pendingManualQuery, performAIAnalysis, formatAIResponse } = useAIWhisperer()
+
 const isPersonalityModalOpen = ref(false)
 const isAutoMode = ref(true)
 const manualInput = ref('')
-const pendingManualQuery = ref('')
-const activeModel = ref<'gemini' | 'openrouter'>('openrouter')
-const geminiModel = ref('gemini-2.5-flash')
-const openRouterModel = ref('openai/gpt-oss-120b:free')
 const isSyncing = ref(false)
-const lastProcessedIdx = ref(0) // Track processed messages for Auto Mode
 
 const syncPersonality = () => {
   if (isSyncing.value) return
   isSyncing.value = true
-  // Simulation of neural sync
-  setTimeout(() => {
-    isSyncing.value = false
-  }, 1500)
+  setTimeout(() => isSyncing.value = false, 1500)
 }
 
-// Auto-Analysis Logic
+// Auto-Analysis Orchestration
 let autoWhisperTimeout: any = null
 
-// Block analysis if user is still talking
 watch(interimText, (newVal) => {
   if (newVal && autoWhisperTimeout) {
     clearTimeout(autoWhisperTimeout)
@@ -274,159 +175,20 @@ watch(interimText, (newVal) => {
 watch(transcript, (newVal) => {
   if (!isStreaming.value || !isAutoMode.value || isAnalyzing.value) return
   
-  // Only trigger if we have new messages since last processing
+  const { lastProcessedIdx } = useSuta()
   if (newVal.length > lastProcessedIdx.value) {
-    const newMessages = newVal.slice(lastProcessedIdx.value)
-    const hasRealContent = newMessages.some(m => m.speaker !== 'System')
+    const hasRealContent = newVal.slice(lastProcessedIdx.value).some(m => m.speaker !== 'System')
     
-    // Only start timeout if not currently receiving interim text
     if (hasRealContent && !interimText.value) {
       clearTimeout(autoWhisperTimeout)
-      autoWhisperTimeout = setTimeout(() => {
-        performAIAnalysis()
-      }, 2000) // 2s of true silence
+      autoWhisperTimeout = setTimeout(() => performAIAnalysis(), 2000)
     }
   }
 }, { deep: true })
 
-// Formatter to make the output look like a pro whisperer
-const formatAIResponse = (text: string) => {
-  if (!text) return ''
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '<b class="text-suta-cyan">$1</b>')
-    .replace(/### (.*?)\n/g, '<h5 class="text-white font-bold text-[14px] mt-4 mb-2 uppercase tracking-wider">$1</h5>')
-}
-
-const SUTA_WHISPERER_PROMPT = computed(() => {
-  const targetLanguageName = settings.value.targetLang === 'id' ? 'Indonesian' : 'English'
-  
-  return `
-You are the "SECRET WHISPERER", a personal job interview assistant acting as a "source person" or "coach" to help the user answer interview questions.
-You have access to the following candidate's full profile:
-
-${JSON.stringify(personality.value, null, 2)}
-
-Your Personality & Tone:
-1. TONE: Human-pro, conversational, and "one-take ready". Imagine a senior developer speaking naturally in an interview.
-2. LANGUAGE: You MUST respond in ${targetLanguageName}. Use natural phrasing (Indonesian: "Sebenarnya...", "Kalau dari sisi...", "Jadi gini...").
-3. PERSONA: You ARE the candidate. Speak in the first person ("I" or "Saya").
-4. BE CONCISE: Complete, but compact. 2-4 sentences max per whisper. High impact, zero fluff.
-5. NO AI-FORMATTING: NEVER use bullet points or numbered lists in the SUGGESTED_WHISPER. Write in natural paragraphs.
-
-Guidelines:
-1. RADICAL HONESTY: NEVER lie. If it's not in the JSON, don't say it. Stick to the projects listed.
-2. PLUG-AND-PLAY: The user must be able to read your response EXACTLY as written. No placeholders, no [brackets], no "..." gaps.
-3. SENIORITY: Sound like a confident professional. Use technical terms naturally without over-explaining like a textbook.
-4. STRATEGY: If the interviewer's question is vague, answer based on your strongest project in the profile.
-
-OUTPUT STRUCTURE:
-- ### SUGGESTED_WHISPER: The ready-to-read answer (No lists, just natural flow).
-- ### STRATEGIC_TIP: One quick tip on delivery or body language.
-`
-})
-
-const performAIAnalysis = async (customQuery?: string) => {
-  const geminiKey = config.geminiApiKey
-  const openRouterKey = config.openrouterApiKey
-
-  if (transcript.value.length < 1 && !customQuery) {
-    return
-  }
-
-  isAnalyzing.value = true
-  if (customQuery) {
-    pendingManualQuery.value = customQuery
-    // Immediate scroll to show the pending bubble
-    setTimeout(scrollToBottom, 50)
-  }
-
-  try {
-    const allMessages = transcript.value
-    const newMessages = customQuery ? [] : allMessages.slice(lastProcessedIdx.value)
-    
-    // Skip if no new content in auto mode
-    if (!customQuery && newMessages.length === 0) {
-      isAnalyzing.value = false
-      return
-    }
-
-    const currentContext = allMessages.map((m: any) => `[${m.speaker}]: ${m.text}`).join('\n')
-    const triggeringContext = newMessages.map(m => m.text).join(' ')
-    const recentWhispers = aiWhispers.value.slice(-3).map(w => `[PREVIOUS_WHISPER]: ${w.content}`).join('\n')
-
-    const finalPrompt = customQuery 
-      ? `USER_QUERY: ${customQuery}\n\nFULL_CONTEXT:\n${currentContext}\n\n${recentWhispers}`
-      : `LATEST_TRANSCRIPT_SEGMENT:\n${triggeringContext}\n\nCONVERSATION_HISTORY:\n${currentContext}\n\n${recentWhispers}\n\nNote: The speaker just continued talking. Ensure your new whisper is coherent with previous whispers.`
-    
-    let endpoint = ''
-    let headers: any = { 'Content-Type': 'application/json' }
-    let body: any = {}
-
-    if (activeModel.value === 'gemini') {
-      endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel.value}:generateContent?key=${geminiKey}`
-      body = {
-        contents: [{
-          parts: [{ text: `${SUTA_WHISPERER_PROMPT.value}\n\n${finalPrompt}` }]
-        }]
-      }
-    } else {
-      endpoint = 'https://openrouter.ai/api/v1/chat/completions'
-      headers['Authorization'] = `Bearer ${openRouterKey}`
-      body = {
-        model: openRouterModel.value,
-        messages: [
-          { role: 'system', content: SUTA_WHISPERER_PROMPT.value },
-          { role: 'user', content: finalPrompt }
-        ]
-      }
-    }
-
-    const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) })
-    const data = await response.json()
-
-    let content = ''
-    if (activeModel.value === 'gemini') {
-      content = data.candidates?.[0]?.content?.parts?.[0]?.text || "Communication interrupted."
-    } else {
-      content = data.choices?.[0]?.message?.content || "Communication interrupted."
-    }
-
-    // Append to history
-    // Aggregate all messages that triggered this analysis into one context bubble
-    const aggregatedNewContext = customQuery 
-      ? customQuery 
-      : transcript.value.slice(lastProcessedIdx.value)
-          .filter(m => m.speaker !== 'System')
-          .map(m => m.text)
-          .join(' ')
-
-    aiWhispers.value.push({
-      type: customQuery ? 'manual' : 'auto',
-      query: aggregatedNewContext,
-      content,
-      model: activeModel.value === 'gemini' ? geminiModel.value : openRouterModel.value,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    })
-
-    // Update processed index if this was an auto-whisper
-    if (!customQuery) {
-      lastProcessedIdx.value = transcript.value.length
-    }
-
-    pendingManualQuery.value = ''
-    scrollToBottom()
-
-  } catch (err) {
-    console.error(err)
-    pendingManualQuery.value = ''
-  } finally {
-    isAnalyzing.value = false
-  }
-}
-
 const scrollToBottom = () => {
   setTimeout(() => {
-    const el = document.querySelector('.flex-1.overflow-y-auto.p-6')
+    const el = document.querySelector('.flex-1.overflow-y-auto')
     if (el) el.scrollTop = el.scrollHeight
   }, 100)
 }
@@ -436,37 +198,28 @@ const handleManualSubmit = () => {
   const query = manualInput.value
   manualInput.value = ''
   performAIAnalysis(query)
+  scrollToBottom()
 }
 
-// Responsive logic
+// Responsive layout handling
 const headerRef = ref<HTMLElement | null>(null)
 const panelWidth = ref(500)
 let resizeObserver: ResizeObserver | null = null
 
 onMounted(() => {
-  if (isStreaming.value) {
-    performAIAnalysis()
-  }
-  
+  if (isStreaming.value) performAIAnalysis()
   if (headerRef.value) {
     resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        panelWidth.value = entry.contentRect.width
-      }
+      for (const entry of entries) panelWidth.value = entry.contentRect.width
     })
     resizeObserver.observe(headerRef.value)
   }
 })
 
 onUnmounted(() => {
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-  }
-  if (autoWhisperTimeout) {
-    clearTimeout(autoWhisperTimeout)
-  }
+  if (resizeObserver) resizeObserver.disconnect()
+  if (autoWhisperTimeout) clearTimeout(autoWhisperTimeout)
 })
-
 </script>
 
 <style scoped>
