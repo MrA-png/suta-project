@@ -1,33 +1,117 @@
 <template>
-  <main class="relative z-10 flex-1 pt-20 pb-32 px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      <span class="w-2 h-2 bg-suta-cyan rounded-full animate-pulse"></span>
-      <span class="text-[9px] font-bold uppercase tracking-[3px] text-suta-cyan">Neural Network Active</span>
+  <main class="relative z-10 flex-1 pt-12 md:pt-24 px-8 max-w-7xl mx-auto flex flex-col items-center">
+    <!-- Hero Section: 2 Columns -->
+    <div class="w-full flex flex-col md:flex-row items-center gap-12 text-left mb-24">
+      <!-- Left Column: Content -->
+      <div class="flex-1 flex flex-col items-start">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <span class="w-2 h-2 bg-suta-cyan rounded-full animate-pulse"></span>
+          <span class="text-[9px] font-bold uppercase tracking-[3px] text-suta-cyan">Neural Network Active</span>
+        </div>
+
+        <h1 class="text-6xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
+          Your Secret <br />
+          <span class="text-white">Whisperer<span class="text-suta-cyan">.</span></span>
+        </h1>
+
+        <p class="max-w-xl text-white/50 text-lg md:text-xl leading-relaxed mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+          Suta is a cognitive extension for technical interviews. Real-time transcription, AI-powered insights, and profile-synced coaching all in one seamless terminal.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
+          <NuxtLink 
+            to="/workspace" 
+            class="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold text-sm uppercase tracking-[4px] rounded-xl hover:bg-white/10 transition-all"
+          >
+            Initiate Session
+          </NuxtLink>
+        </div>
+      </div>
+
+      <!-- Right Column: ASCII Silhouette -->
+      <div class="flex-1 hidden md:flex justify-end items-center pr-2 animate-in fade-in zoom-in duration-1000 delay-700">
+        <div class="relative group">
+          <!-- Glow Effect (Outside) -->
+          <div class="absolute inset-0 bg-suta-cyan/20 blur-[100px] rounded-full group-hover:bg-suta-cyan/30 transition-all duration-700"></div>
+          
+          <!-- Tightly wrapped container for ASCII + Scan -->
+          <div class="relative overflow-hidden rounded-lg">
+            <pre class="relative select-none group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-500 whitespace-pre drop-shadow-[0_0_15px_rgba(0,240,255,0.4)] opacity-80 ascii-art text-suta-cyan leading-[1.1] text-[8px] font-bold pr-10">
+          ....................................................................................................
+          ....................................................................................................
+          ....................................................................................................
+          ....................................................................................................
+          ....................................................................................................
+          ....................................................................................................
+          ....................................................................................................
+          ............................................:-+*##%#*+-:............................................
+          .........................................:%%@@@@@@@@@@@@@%+.........................................
+          .......................................-%@@@%###****+*#%@@@@%-......................................
+          ......................................*%%%###**#####*##**#%@@@%.....................................
+          .....................................#%%####**##%%######%###%@@%:...................................
+          ....................................#@@##******#%##*####%##**#@@@:..................................
+          ...................................-%@%#**********###*###%#***#@@#..................................
+          ..................................:%%@##*************##***#***#%@@=.................................
+          .................................:%%%#***##*********+*+==+#****%@@*.................................
+          ...............................:.*%@%%%#***********+++**+++++**#@@%.................................
+          .......................::.::::::+%%%@***********#%@@@@@@@@@%*+**@@%:::.:.........:.:................
+          .....................:.::::::::-%%%@@@*+**+*#@@@@@@@@@@@@@@@@@#+%@%:.:.:..:.:.....:...........:.....
+          ..........:.::::....:::::::::::%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%+%%:::::::::::::::::::::::::::::::.:
+          ........::.:.::.:.::::::::::::%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#*:::::::::::::::::::::::::::::::..
+          ......:::.::.:::.::::::::::::-%%%@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#=:::::::::::::::::::::::::::::::::
+          .::..:::::::::::::::::::::::-%%%%%%%@@@@%@@@@@@@@@@@@@@@@@@@@@@@@#::::::::::::::::::::::::::::::::::
+          :.:...::::::::::::::::::::::*%@%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%*::::::::::::::::::::::::::::::::::
+          :::..:.::::::::::::::::::::+%%%@%%%%@@@@@@@@@@@@%%%@@@@@@@@@@@%%%#::..::::::::::::::::::::::::::::::
+          ::.:::.::::.:..::::::::::::%%%@@%%@%%@@@@@@@@@@@@@@@%@@@@@@@@@%%%#::::::::::::::::::::::::::::::::::
+          ::..::.::.:::.::::::::::::*%%%%%%%%@%@@@@@@@@@%%@%%%@@@@@@@@%%%%%*::::::::::::::::::::::::::::::::::
+          ::.::.:::..:::::::::::::::#%%%%%@%%@%@@@@@@@@@@%@@@%%@@@@@@%%%%%%+::::::::::::::::::::::::::::::::::
+          .::..::::...:.::::::::::::#%%%@@@@%@%@@@@@@@@@@@@@@@@@@@@@%%%@%%%:::::::::::::::::::::::::::::::::::
+          .:::::.:.....:::::::::::::*%%%%%%%%@@%@@@@@@@@@@@@@@@@@@@%%%%@%%%:::::::::::::::::::::::::::::::::::
+          :.:::::.:::.::::::::::::::-%@%%%@%%%@%%@@@@@@@@@@@@@@@@@%%%%%%@%%=::::::::::::::::::::::::::::::::::
+          :.::::::::.::::::::::::::::*@@@@@%%@@%%@@@@@@@@@@@@@@@@@%@%%%@%%%-::::::.:.:::::::::::::::::::::::::
+          ::...:..:..::::::::::::::::=@@@@@@@@@@@%@@@@@@@@@@@@@@@@@@@@%%%#::::::::::::::.:::::::::::::::::::::
+          ::::.:::...::::::::::::::::+%@@@@@@@@@@@@@@@@@@@@@@%@@@@@@@@@@@%+::=-:::::::::::::::::::::::::::::::
+          :....:.....::::::::::::::::%%%%%@@@@@@@@%@@@@@@@@%%@@@@@%@@@@@@@@%%%@@%###%#-:::::.:::::::::::::::::
+          .:::..:.::::::::::::::::::=%%%%%%@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%@@%%%@@%%%%%%%#-::::::::::::::::
+          :::.....::::::::::::::-*%%%%%%%%%%@@@@@@@%@@@@@@@%@@@@@@@@@@@@@@@@@@@@%%@@%%%%%%%%%%%%*:::::::::::::
+          ........:::::::::::-#%%@@%@@@@@@%%%%%@@@@%@@@@@@%%@@@@@@%@@@%%@@@@@@@@%@@@@%%@%%%%%%%%%%%##:::::::::
+          :.::....::::::::-#%@%@@@@%@@%@@@@@@@@@@@%%@@@@@@%%@%@%@@@@%@%%%@@@@@%%%@@@@@@@%%@%%%%%%%%%%+::-:::::
+          :::....::::::+%%%%%%@%%%@@@%%%%%%%@%%%%@%%@%%@@@%%%%@@@@%%%%%%%@@@@%%%%%@@@@%%%%%%@@%%@@%%%%%%%%%%%%
+          .::::..::=#%%%%%%%@%%%@%%%%%%%%%%@%@%%%@%%%@%%@@%%%%@%%%%%%%%%%@@@%%@@@%@@@@@%@@@@@%%@@@%%%%%%%%%%%%
+          ::::.::%%%%%%%%%%%%%%%@@%%%%%%%%@%%%%%%@%@@%%@%@%%%%@%%%%%%%%%%@@@%@@@@@%@@@@@@@@@@%%@@@@@@@%%%%%%%%
+          :.:.:#%%%%%@%%%%%@%%%%%@@%%%%%%%%%%%%%%%%@@@@@@@%%%%%%%%%%%%%%@@@@%%@@@@%@@@@@@@@@@@%%@@@@@%%%%%%%%%
+          :::-%%%%%%%%%%%%%%@@%%%%@@@%%@%%%%%%%%%@%@@@@%@@%%%@%%@@%%%%%%@@@@%%@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%
+          :.:%%%%%%%%%%%@%%%%%%%%%%%%@%%%@@@%%%%@@%@@@@@@@%%@@@@%%%%%%%%@@@@@%@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%%%
+          ::%%%%%%%@%%%%%%%%%@@%%%%%%%@%@%%%%%%%@@%@@@@@@@%@@@%%%%%%%%%%@@@@@%%@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%
+          :%%%%%@%@@%%%%%@@%%%%%%%%%%%%%%@%@%%%@@@%@@@@@@@%@%%@@%%%%%%%%@@@@@@%@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%
+          -%@@@%%%@@%%%%@%@@@%%@@%%%%%@%%%@%%%%@@@%@@@@@@@%@@%%@%%%%%%%%@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%
+          #%%%@%%%%%@@@%%@@@@%%%@%%%%%@@@@%%%%@@@@%@@@@@@%%%@%@@%%%%%%%%@@@@@@@@@@@@%%%%%%%%%%%%%@@@%%@%%%%%%%
+          %%%@@@@@@@%@@@%%@@@@%%%%%@%%@%@@%%%@@@@@@@@@@@@@%%@@@%%%%%%%%%@@@@@@@@@%%%%%%%%%%%%%%%%%%%%%@@%%@@%%
+          %%%@%@@@%@@%@@%%@@@@%%%%%@@@@@@%%%@@@@@@%@%@@@@@@%%%@%%%%%%%%@@@@@@@%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+          @%%@@@%@@@%@@@@%@@@@@%%%%@@@@@%%%%@@@@@@%@@%@@@%%%%@@%%%%%@%%@@%%%%%%%%%%%%@%@%%%%%%%%%%%%%%%%%%%%%%
+          @@%%@%@@@@@%@@@@@@@@@%%%%%@@@@%%%%@@@@@@@@%@@@%@@%@@@@%%%%%%%%%%@%@%%%%%%%%@@@@@@@@@%%%%%%%@%@%%@%@@
+          @@@@@@%%@@@@%@@@@@@@@@@%@@@@@%%@@@@@@@@@%@@@@@@@%%@@@@%%%%%%%%%%%%@@@%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@
+            </pre>
+
+            <!-- Scanning Line (Now constrained by overflow-hidden parent) -->
+            <div class="absolute top-0 inset-x-0 h-[80px] bg-gradient-to-b from-transparent via-suta-cyan/30 to-transparent animate-scan pointer-events-none"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <h1 class="text-6xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
-      Your Secret <br />
-      <span class="text-white">Whisperer<span class="text-suta-cyan">.</span></span>
-    </h1>
-
-    <p class="max-w-xl text-white/50 text-lg md:text-xl leading-relaxed mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-      Suta is a cognitive extension for technical interviews. Real-time transcription, AI-powered insights, and profile-synced coaching—all in one seamless terminal.
-    </p>
-
-    <div class="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
-      <NuxtLink 
-        to="/workspace" 
-        class="group relative px-8 py-4 bg-suta-cyan text-black font-black text-sm uppercase tracking-[4px] rounded-xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(0,240,255,0.3)]"
-      >
-        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
-        Initiate Session
-      </NuxtLink>
-      
-      <button class="px-8 py-4 bg-white/5 border border-white/10 text-white font-bold text-sm uppercase tracking-[4px] rounded-xl hover:bg-white/10 transition-all">
-        Watch Demo
-      </button>
-    </div>
-
+    <!-- Features, Workflow, etc. go here -->
     <slot />
   </main>
 </template>
+
+<style scoped>
+@keyframes scan {
+  0% { top: -100px; }
+  100% { top: 100%; }
+}
+
+.animate-scan {
+  animation: scan 3s linear infinite;
+}
+</style>
