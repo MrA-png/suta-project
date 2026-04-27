@@ -121,12 +121,19 @@
               </div>
 
               <div id="transcription" class="space-y-4 pt-8 border-t border-white/5">
-                <h3 class="text-xl font-bold text-suta-cyan">Transcription Flow</h3>
+                <h3 class="text-xl font-bold text-suta-cyan">Dual-Engine Transcription</h3>
                 <p class="text-white/60 leading-relaxed">
-                  Suta handles both browser-internal and system-level audio. This allows you to capture meetings in Zoom, Microsoft Teams, or Google Meet regardless of whether they are running in a tab or as a standalone app.
+                  Suta allows you to choose your "Ears" based on the environment. 
                 </p>
-                <div class="p-5 bg-white/5 border-l-2 border-suta-cyan rounded-r-lg italic text-sm text-white/80">
-                  "The transcription engine uses a custom AudioWorklet to process PCM data locally before streaming, ensuring peak performance even on moderate hardware."
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                  <div class="p-4 bg-white/[0.03] border border-white/10 rounded-xl">
+                    <h5 class="text-xs font-bold text-white uppercase tracking-widest mb-1">Deepgram Nova-2</h5>
+                    <p class="text-[10px] text-white/40 leading-relaxed">Native WebSocket streaming for sub-second visual feedback. Best for fast-paced Q&A sessions.</p>
+                  </div>
+                  <div class="p-4 bg-white/[0.03] border border-white/10 rounded-xl">
+                    <h5 class="text-xs font-bold text-suta-cyan uppercase tracking-widest mb-1">Groq Whisper Turbo</h5>
+                    <p class="text-[10px] text-white/40 leading-relaxed">High-fidelity <b>whisper-large-v3-turbo</b> model. Perfect for complex technical jargon and foreign accents.</p>
+                  </div>
                 </div>
               </div>
 
@@ -284,8 +291,8 @@
             <h2 class="text-3xl font-bold tracking-tight mb-8">System Configuration & Privacy</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               <div class="space-y-4">
-                <h4 class="text-sm font-bold text-white uppercase tracking-widest">Language Protocols</h4>
-                <p class="text-xs text-white/40 leading-relaxed">Switch between global languages for source capture. Suta's translator is enabled by default, converting foreign technical dialogue into your primary language in real-time to ensure seamless communication.</p>
+                <h4 class="text-sm font-bold text-white uppercase tracking-widest">Cognitive Translation</h4>
+                <p class="text-xs text-white/40 leading-relaxed">When the <b>Live Translator</b> is enabled, Suta activates its combined neural path. It doesn't just translate words; it synthesizes technical answers in your target language based on the translated context, providing a seamless "Foreign-to-Strategy" bridge.</p>
               </div>
               <div class="space-y-4">
                 <h4 class="text-sm font-bold text-white uppercase tracking-widest">Model Architecture</h4>

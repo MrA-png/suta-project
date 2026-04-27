@@ -18,8 +18,8 @@ const features = [
     iconStyle: '[mask-image:url(/icons/ai.svg)] [mask-size:contain] [mask-repeat:no-repeat]'
   },
   {
-    title: 'Real-time Sync',
-    description: 'Captures audio directly from your browser tabs with ultra-low latency transcription.',
+    title: 'Dual-Engine Transcription',
+    description: 'Switch between Deepgram (Real-time) or Groq Whisper (Turbo) for the perfect balance of speed and accuracy.',
     iconStyle: '[mask-image:url(/icons/source.svg)] [mask-size:contain] [mask-repeat:no-repeat]'
   },
   {
