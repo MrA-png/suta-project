@@ -84,8 +84,14 @@ Suta is built with a **Privacy-First Architecture**:
 - **Local Keys**: API keys are managed via environment variables and never stored on a centralized server.
 - **Purge Command**: Easily clear all session data with a single click in the terminal.
 
+## ⚖️ License
+
+This project is licensed under a **Proprietary License**. All rights are reserved by **MrA-png**. 
+
+Usage, modification, or redistribution of this software is strictly prohibited without explicit written permission from the author. For inquiries, please contact the author via [GitHub](https://github.com/MrA-png).
+
 ---
 
 <p align="center">
-  Built with technical excellence by <b>Suta Assist</b> &copy; MrA-png
+  Built with technical excellence by <b>Suta Assist</b> &copy; 2026 <b>MrA-png</b>
 </p>

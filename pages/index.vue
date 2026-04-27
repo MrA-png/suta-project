@@ -22,8 +22,9 @@
     <!-- Footer -->
     <footer class="relative z-10 mt-32 py-10 border-t border-white/5 px-8">
       <div class="max-w-7xl mx-auto flex justify-center items-center gap-8">
-        <div class="text-white/20 text-[10px] uppercase tracking-[3px] font-bold">
-          &copy; 2026 Suta Assist | Terminal Protocol V1.0
+        <div class="text-white/20 text-[10px] uppercase tracking-[3px] font-bold flex items-center gap-2">
+          &copy; 2026 Suta Assist | Terminal Protocol V1.0 | BY 
+          <a href="https://github.com/MrA-png" target="_blank" class="text-white/30 hover:text-suta-cyan transition-colors underline-offset-4 hover:underline">MrA-png</a>
         </div>
       </div>
     </footer>

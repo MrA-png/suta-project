@@ -87,6 +87,7 @@ const handleMouseMove = (e: MouseEvent) => {
   const isInteractive = target.closest('button') || 
                    target.closest('a') || 
                    target.closest('input') ||
+                   target.closest('footer') ||
                    window.getComputedStyle(target).cursor === 'pointer'
   
   isOverInteractive.value = !!isInteractive
