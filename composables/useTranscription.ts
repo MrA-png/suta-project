@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { useSuta } from './useSuta'
 import { useTranslation } from './useTranslation'
+import { useUsage } from './useUsage'
 
 export const useTranscription = () => {
   const { public: config } = useRuntimeConfig()
@@ -72,7 +73,13 @@ export const useTranscription = () => {
       }
 
       socket.onmessage = async (message) => {
+        const { trackTranscriptionUsage } = useUsage()
         const data = JSON.parse(message.data)
+
+        if (data.metadata?.duration) {
+          trackTranscriptionUsage('deepgram', data.metadata.duration)
+        }
+
         const transcriptText = data.channel?.alternatives?.[0]?.transcript
         
         if (transcriptText?.trim()) {
@@ -133,11 +140,24 @@ export const useTranscription = () => {
       'audio/aac'
     ].find(type => MediaRecorder.isTypeSupported(type))
 
-    const captureChunk = () => {
-      if (!isListening.value || !activeStream.value) return
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const analyser = audioCtx.createAnalyser()
+    const source = audioCtx.createMediaStreamSource(stream)
+    source.connect(analyser)
+    analyser.fftSize = 512
+    const dataArray = new Uint8Array(analyser.frequencyBinCount)
 
-      const audioStream = new MediaStream(activeStream.value.getAudioTracks())
-      const recorder = new MediaRecorder(audioStream, mimeType ? { mimeType } : {})
+    let silenceStart = 0
+    const SILENCE_THRESHOLD = 15 // Adjust based on testing
+    const SILENCE_DURATION = 1500 // 1.5 seconds of silence to trigger stop
+
+    const captureChunk = () => {
+      if (!isListening.value || !activeStream.value) {
+        audioCtx.close()
+        return
+      }
+
+      const recorder = new MediaRecorder(activeStream.value, mimeType ? { mimeType } : {})
       const chunks: Blob[] = []
 
       recorder.ondataavailable = (e) => {
@@ -149,21 +169,47 @@ export const useTranscription = () => {
           const blob = new Blob(chunks, { type: mimeType || 'audio/webm' })
           await sendToGroq(blob)
         }
-        // Start next chunk
         if (isListening.value) captureChunk()
       }
 
-      // Record for 3 seconds then stop to finalize the file
       recorder.start()
-      setTimeout(() => {
-        if (recorder.state === 'recording') recorder.stop()
-      }, 3500)
+
+      const checkSilence = () => {
+        if (recorder.state !== 'recording') return
+
+        analyser.getByteFrequencyData(dataArray)
+        const volume = dataArray.reduce((a, b) => a + b) / dataArray.length
+
+        if (volume < SILENCE_THRESHOLD) {
+          if (silenceStart === 0) silenceStart = Date.now()
+          if (Date.now() - silenceStart > SILENCE_DURATION) {
+            recorder.stop()
+            silenceStart = 0
+            return
+          }
+        } else {
+          silenceStart = 0
+        }
+
+        // Also stop if recording exceeds 15 seconds to prevent too large files
+        const recordingDuration = Date.now() - (recorder as any)._startTime
+        if (recordingDuration > 15000) {
+          recorder.stop()
+          return
+        }
+
+        requestAnimationFrame(checkSilence)
+      }
+
+      (recorder as any)._startTime = Date.now()
+      checkSilence()
     }
 
     captureChunk()
   }
 
   const sendToGroq = async (blob: Blob) => {
+    const { trackTranscriptionUsage } = useUsage()
     const apiKey = config.groqApiKey
     const formData = new FormData()
     formData.append('file', blob, 'audio.webm')
@@ -178,6 +224,10 @@ export const useTranscription = () => {
         body: formData
       })
       const data = await response.json()
+      
+      // Track Groq Whisper usage (we estimate duration from blob if possible, or just track request)
+      trackTranscriptionUsage('groq-whisper', 0) 
+
       if (data.text?.trim()) {
         addMessage('Speaker', data.text)
         if (settings.value.isTranslatorEnabled) {

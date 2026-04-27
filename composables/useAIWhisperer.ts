@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { useSuta } from './useSuta'
+import { useUsage } from './useUsage'
 
 export const useAIWhisperer = () => {
   const { public: config } = useRuntimeConfig()
@@ -22,7 +23,6 @@ export const useAIWhisperer = () => {
     { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B' },
     { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B' },
     { id: 'openai/gpt-oss-20b', name: 'GPT OSS 20B' },
-    { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B' },
     { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B' },
   ]
   const pendingManualQuery = ref('')
@@ -71,12 +71,21 @@ OUTPUT STRUCTURE:
     return basePrompt
   })
 
+  let currentAbortController: AbortController | null = null
+
   const performAIAnalysis = async (customQuery?: string) => {
     const geminiKey = config.geminiApiKey
     const openRouterKey = config.openrouterApiKey
     const groqKey = config.groqApiKey
 
     if (transcript.value.length < 1 && !customQuery) return
+
+    // Abort previous analysis if still running
+    if (currentAbortController) {
+      currentAbortController.abort()
+    }
+    currentAbortController = new AbortController()
+    const { signal } = currentAbortController
 
     isAnalyzing.value = true
     
@@ -96,7 +105,7 @@ OUTPUT STRUCTURE:
     if (customQuery) pendingManualQuery.value = customQuery
 
     try {
-
+      const { trackAIUsage } = useUsage()
       const currentContext = allMessages.map((m: any) => `[${m.speaker}]: ${m.text}`).join('\n')
       const triggeringContext = newMessages.map(m => m.text).join(' ')
       const recentWhispers = aiWhispers.value.slice(-3).map(w => `[PREVIOUS_WHISPER]: ${w.content}`).join('\n')
@@ -138,8 +147,22 @@ OUTPUT STRUCTURE:
         }
       }
 
-      const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) })
+      const response = await fetch(endpoint, { 
+        method: 'POST', 
+        headers, 
+        body: JSON.stringify(body),
+        signal 
+      })
       const data = await response.json()
+
+      // Track Usage
+      let tokensUsed = 0
+      if (activeModel.value === 'gemini') {
+        tokensUsed = data.usageMetadata?.totalTokenCount || 0
+      } else {
+        tokensUsed = data.usage?.total_tokens || 0
+      }
+      trackAIUsage(activeModel.value, tokensUsed)
 
       let content = ''
       if (activeModel.value === 'gemini') {
@@ -173,12 +196,19 @@ OUTPUT STRUCTURE:
 
       pendingManualQuery.value = ''
       pendingContext.value = ''
-    } catch (err) {
-      console.error('AI Analysis Error:', err)
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log('AI Analysis aborted due to new input.')
+      } else {
+        console.error('AI Analysis Error:', err)
+      }
       pendingManualQuery.value = ''
       pendingContext.value = ''
     } finally {
-      isAnalyzing.value = false
+      if (currentAbortController?.signal === signal) {
+        isAnalyzing.value = false
+        currentAbortController = null
+      }
     }
   }
 

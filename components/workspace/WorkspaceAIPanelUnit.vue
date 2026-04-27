@@ -89,7 +89,7 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto custom-scrollbar relative">
+    <div ref="scrollContainer" class="flex-1 overflow-y-auto custom-scrollbar relative">
       <!-- Sticky Info Row -->
       <div class="sticky top-0 z-30 flex items-center justify-between p-2 pb-2 bg-black/60 backdrop-blur-xl border-b border-white/5">
         <button 
@@ -181,7 +181,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useSuta } from '../../composables/useSuta'
 import { useAIWhisperer } from '../../composables/useAIWhisperer'
 
@@ -205,6 +205,7 @@ const isPersonalityModalOpen = ref(false)
 const isAutoMode = ref(true)
 const manualInput = ref('')
 const isSyncing = ref(false)
+const scrollContainer = ref<HTMLElement | null>(null)
 
 const syncPersonality = () => {
   if (isSyncing.value) return
@@ -212,7 +213,24 @@ const syncPersonality = () => {
   setTimeout(() => isSyncing.value = false, 1500)
 }
 
-// Auto-Analysis Orchestration
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (scrollContainer.value) {
+      scrollContainer.value.scrollTo({
+        top: scrollContainer.value.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+  })
+}
+
+// Watchers for auto-scroll
+watch(aiWhispers, () => scrollToBottom(), { deep: true })
+watch(isAnalyzing, (val) => { if (val) scrollToBottom() })
+
+// Auto-Analysis Orchestration with 2-second silence detection
+let analysisTimeout: any = null
+
 watch(transcript, (newVal) => {
   if (!isStreaming.value || !isAutoMode.value || isAnalyzing.value) return
   
@@ -220,18 +238,26 @@ watch(transcript, (newVal) => {
   if (newVal.length > lastProcessedIdx.value) {
     const hasRealContent = newVal.slice(lastProcessedIdx.value).some(m => m.speaker !== 'System')
     
-    if (hasRealContent && !interimText.value) {
-      performAIAnalysis()
+    if (hasRealContent) {
+      if (analysisTimeout) clearTimeout(analysisTimeout)
+      
+      analysisTimeout = setTimeout(() => {
+        // Trigger only if still not analyzing and no ongoing speech (interim)
+        if (!isAnalyzing.value && !interimText.value) {
+          performAIAnalysis()
+        }
+      }, 2000)
     }
   }
 }, { deep: true })
 
-const scrollToBottom = () => {
-  setTimeout(() => {
-    const el = document.querySelector('.flex-1.overflow-y-auto')
-    if (el) el.scrollTop = el.scrollHeight
-  }, 100)
-}
+// Reset analysis timer if user starts speaking again (interim text active)
+watch(interimText, (newVal) => {
+  if (newVal && analysisTimeout) {
+    clearTimeout(analysisTimeout)
+    analysisTimeout = null
+  }
+})
 
 const handleManualSubmit = () => {
   if (!manualInput.value.trim() || isAnalyzing.value) return
@@ -254,6 +280,7 @@ onMounted(() => {
     })
     resizeObserver.observe(headerRef.value)
   }
+  scrollToBottom()
 })
 
 onUnmounted(() => {

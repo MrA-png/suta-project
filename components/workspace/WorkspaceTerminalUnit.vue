@@ -9,6 +9,18 @@
       </NuxtLink>
       
       <div class="flex items-center gap-2" ref="headerRef">
+        <!-- Resource Monitor -->
+        <button 
+          class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-suta-muted hover:text-suta-cyan transition-all relative group"
+          @click="showUsage = true"
+          title="Resource Usage Monitor"
+        >
+          <div class="w-5 h-5 bg-current [mask-image:url(/icons/ai.svg)] [mask-size:contain] [mask-repeat:no-repeat] opacity-70 group-hover:opacity-100"></div>
+          <div class="absolute top-2 right-2 w-1.5 h-1.5 bg-suta-cyan rounded-full border border-suta-dark-gray"></div>
+        </button>
+
+        <div class="w-[1px] h-4 bg-white/10 mx-1"></div>
+
         <!-- AI Panel Toggle -->
         <button 
           class="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all group overflow-hidden"
@@ -71,6 +83,7 @@
     <!-- Modals -->
     <WorkspaceModalsHistory :show="showHistory" @close="showHistory = false" />
     <WorkspaceModalsSettings :show="showSettings" @close="showSettings = false" />
+    <WorkspaceModalsUsage :show="showUsage" @close="showUsage = false" />
     <UiBaseConfirmation 
       :show="showResetConfirm"
       title="END SESSION?"
@@ -91,6 +104,7 @@ const { transcript, interimText, isListening, settings, isAIPanelOpen, clearTran
 
 const showSettings = ref(false)
 const showHistory = ref(false)
+const showUsage = ref(false)
 const showResetConfirm = ref(false)
 const transcriptionRef = ref<HTMLElement | null>(null)
 const headerRef = ref<HTMLElement | null>(null)
