@@ -21,11 +21,11 @@
         </button>
       </div>
       
-      <div class="flex gap-2 items-center" :class="panelWidth < 350 ? 'justify-between' : 'justify-start'">
+      <div class="flex gap-2 items-center overflow-x-auto custom-scrollbar-hide pb-1 justify-start">
         <!-- Model Selector -->
         <div class="flex items-center bg-white/5 rounded-full p-0.5 border border-white/10 flex-shrink-0">
           <button 
-            v-for="m in ['gemini', 'openrouter']" 
+            v-for="m in ['gemini', 'openrouter', 'groq']" 
             :key="m"
             @click="activeModel = m as any"
             class="px-2.5 py-1 rounded-full text-[8px] font-bold uppercase transition-all"
@@ -47,6 +47,43 @@
         >
           <div class="w-1.5 h-1.5 rounded-full" :class="isAutoMode ? 'bg-suta-cyan animate-pulse' : 'bg-white/20'"></div>
           <span class="text-[8px] font-bold uppercase tracking-widest">{{ isAutoMode ? 'Auto' : 'Manual' }}</span>
+        </button>
+      </div>
+
+      <!-- Model Specific Selectors (Sub-menus) -->
+      <div v-if="activeModel === 'gemini'" class="flex gap-1.5 overflow-x-auto custom-scrollbar-hide pb-1">
+        <button 
+          v-for="gm in geminiModels" 
+          :key="gm.id"
+          @click="geminiModel = gm.id"
+          class="px-2 py-0.5 rounded border text-[7px] font-bold uppercase transition-all whitespace-nowrap"
+          :class="geminiModel === gm.id ? 'bg-suta-cyan/20 border-suta-cyan text-suta-cyan' : 'bg-white/5 border-white/10 text-suta-muted hover:text-white'"
+        >
+          {{ gm.name }}
+        </button>
+      </div>
+
+      <div v-else-if="activeModel === 'openrouter'" class="flex gap-1.5 overflow-x-auto custom-scrollbar-hide pb-1">
+        <button 
+          v-for="om in openRouterModels" 
+          :key="om.id"
+          @click="openRouterModel = om.id"
+          class="px-2 py-0.5 rounded border text-[7px] font-bold uppercase transition-all whitespace-nowrap"
+          :class="openRouterModel === om.id ? 'bg-suta-cyan/20 border-suta-cyan text-suta-cyan' : 'bg-white/5 border-white/10 text-suta-muted hover:text-white'"
+        >
+          {{ om.name }}
+        </button>
+      </div>
+
+      <div v-else-if="activeModel === 'groq'" class="flex gap-1.5 overflow-x-auto custom-scrollbar-hide pb-1">
+        <button 
+          v-for="gm in groqModels" 
+          :key="gm.id"
+          @click="groqModel = gm.id"
+          class="px-2 py-0.5 rounded border text-[7px] font-bold uppercase transition-all whitespace-nowrap"
+          :class="groqModel === gm.id ? 'bg-suta-cyan/20 border-suta-cyan text-suta-cyan' : 'bg-white/5 border-white/10 text-suta-muted hover:text-white'"
+        >
+          {{ gm.name }}
         </button>
       </div>
     </div>
@@ -149,7 +186,20 @@ import { useSuta } from '../../composables/useSuta'
 import { useAIWhisperer } from '../../composables/useAIWhisperer'
 
 const { transcript, interimText, isAIPanelOpen, isStreaming, personality, aiWhispers } = useSuta()
-const { isAnalyzing, activeModel, pendingManualQuery, pendingContext, performAIAnalysis, formatAIResponse } = useAIWhisperer()
+const { 
+  isAnalyzing, 
+  activeModel, 
+  pendingManualQuery, 
+  pendingContext, 
+  geminiModel, 
+  geminiModels, 
+  openRouterModel, 
+  openRouterModels, 
+  groqModel, 
+  groqModels, 
+  performAIAnalysis, 
+  formatAIResponse 
+} = useAIWhisperer()
 
 const isPersonalityModalOpen = ref(false)
 const isAutoMode = ref(true)
@@ -214,4 +264,6 @@ onUnmounted(() => {
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar { width: 3px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,240,255,0.1); border-radius: 10px; }
+.custom-scrollbar-hide::-webkit-scrollbar { display: none; }
+.custom-scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>

@@ -6,17 +6,34 @@ export const useAIWhisperer = () => {
   const { transcript, settings, personality, aiWhispers, lastProcessedIdx } = useSuta()
   
   const isAnalyzing = ref(false)
-  const activeModel = ref<'gemini' | 'openrouter'>('openrouter')
+  const activeModel = ref<'gemini' | 'openrouter' | 'groq'>('groq')
   const geminiModel = ref('gemini-2.0-flash')
+  const geminiModels = [
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' }
+  ]
   const openRouterModel = ref('openai/gpt-oss-120b:free')
+  const openRouterModels = [
+    { id: 'openai/gpt-oss-120b:free', name: 'GPT OSS 120B' },
+    { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash' },
+  ]
+  const groqModel = ref('llama-3.3-70b-versatile')
+  const groqModels = [
+    { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B' },
+    { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B' },
+    { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B' },
+    { id: 'openai/gpt-oss-20b', name: 'GPT OSS 20B' },
+    { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B' },
+    { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B' },
+  ]
   const pendingManualQuery = ref('')
   const pendingContext = ref('')
 
   const SUTA_WHISPERER_PROMPT = computed(() => {
     const isIndonesian = settings.value.sourceLang.startsWith('id')
     const responseLanguage = isIndonesian ? 'Indonesian' : 'English'
-    
-    return `
+    const isTranslatorMode = settings.value.isTranslatorEnabled
+
+    let basePrompt = `
 You are the "SECRET WHISPERER", a personal job interview assistant acting as a "source person" or "coach" to help the user answer interview questions.
 You have access to the following candidate's full profile:
 
@@ -25,9 +42,21 @@ ${JSON.stringify(personality.value, null, 2)}
 Your Personality & Tone:
 1. TONE: Human-pro, conversational, and "one-take ready". Imagine a senior developer speaking naturally in an interview.
 2. LANGUAGE: You MUST respond in ${responseLanguage}. Use natural phrasing (Indonesian: "Sebenarnya...", "Kalau dari sisi...", "Jadi gini...").
-3. PERSONA: You ARE the candidate. Speak in the first person ("I" or "Saya").
-4. BE CONCISE: Complete, but compact. 2-4 sentences max per whisper. High impact, zero fluff.
-5. NO AI-FORMATTING: NEVER use bullet points or numbered lists in the SUGGESTED_WHISPER. Write in natural paragraphs.
+`
+
+    if (isTranslatorMode) {
+      basePrompt += `
+3. SPECIAL INSTRUCTION (TRANSLATOR MODE): The input text might be in a different language. 
+   - First, identify the meaning of the input.
+   - You MUST provide the suggested answer in ${responseLanguage}.
+   - If the input is a question from an interviewer in English and you are responding in Indonesian, provide a strategic technical answer in Indonesian that the user can say.
+`
+    }
+
+    basePrompt += `
+4. PERSONA: You ARE the candidate. Speak in the first person ("I" or "Saya").
+5. BE CONCISE: Complete, but compact. 2-4 sentences max per whisper. High impact, zero fluff.
+6. NO AI-FORMATTING: NEVER use bullet points or numbered lists in the SUGGESTED_WHISPER. Write in natural paragraphs.
 
 Guidelines:
 1. RADICAL HONESTY: NEVER lie. If it's not in the JSON, don't say it. Stick to the projects listed.
@@ -39,11 +68,13 @@ OUTPUT STRUCTURE:
 - ### SUGGESTED_WHISPER: The ready-to-read answer (No lists, just natural flow).
 - ### STRATEGIC_TIP: One quick tip on delivery or body language.
 `
+    return basePrompt
   })
 
   const performAIAnalysis = async (customQuery?: string) => {
     const geminiKey = config.geminiApiKey
     const openRouterKey = config.openrouterApiKey
+    const groqKey = config.groqApiKey
 
     if (transcript.value.length < 1 && !customQuery) return
 
@@ -85,11 +116,21 @@ OUTPUT STRUCTURE:
             parts: [{ text: `${SUTA_WHISPERER_PROMPT.value}\n\n${finalPrompt}` }]
           }]
         }
-      } else {
+      } else if (activeModel.value === 'openrouter') {
         endpoint = 'https://openrouter.ai/api/v1/chat/completions'
         headers['Authorization'] = `Bearer ${openRouterKey}`
         body = {
           model: openRouterModel.value,
+          messages: [
+            { role: 'system', content: SUTA_WHISPERER_PROMPT.value },
+            { role: 'user', content: finalPrompt }
+          ]
+        }
+      } else if (activeModel.value === 'groq') {
+        endpoint = 'https://api.groq.com/openai/v1/chat/completions'
+        headers['Authorization'] = `Bearer ${groqKey}`
+        body = {
+          model: groqModel.value,
           messages: [
             { role: 'system', content: SUTA_WHISPERER_PROMPT.value },
             { role: 'user', content: finalPrompt }
@@ -118,7 +159,11 @@ OUTPUT STRUCTURE:
         type: customQuery ? 'manual' : 'auto',
         query: aggregatedNewContext,
         content,
-        model: activeModel.value === 'gemini' ? geminiModel.value : openRouterModel.value,
+        model: activeModel.value === 'gemini' 
+          ? geminiModel.value 
+          : activeModel.value === 'groq' 
+            ? groqModel.value 
+            : openRouterModel.value,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       })
 
@@ -149,6 +194,12 @@ OUTPUT STRUCTURE:
     activeModel,
     pendingManualQuery,
     pendingContext,
+    geminiModel,
+    geminiModels,
+    openRouterModel,
+    openRouterModels,
+    groqModel,
+    groqModels,
     performAIAnalysis,
     formatAIResponse
   }

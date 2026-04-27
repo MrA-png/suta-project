@@ -14,9 +14,37 @@
           <span class="text-white">Whisperer<span class="text-suta-cyan">.</span></span>
         </h1>
 
-        <p class="max-w-xl text-white/50 text-lg md:text-xl leading-relaxed mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+        <p class="max-w-xl text-white/50 text-lg md:text-xl leading-relaxed mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
           Suta is an advanced AI whispering system for technical interviews. Real-time transcription, AI-powered insights, and profile-synced coaching all in one seamless terminal.
         </p>
+
+        <!-- Neural Engine Fleet -->
+        <div class="flex flex-wrap items-center gap-6 mb-12 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-400">
+          <div class="flex flex-col gap-1">
+            <span class="text-[8px] font-bold text-suta-cyan uppercase tracking-[3px] opacity-50">Core Engine</span>
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg">
+              <span class="text-[10px] font-black text-white">GROQ</span>
+              <span class="w-[1px] h-3 bg-white/10"></span>
+              <span class="text-[9px] font-bold text-suta-cyan">Llama 3.3 / Scout</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-[8px] font-bold text-suta-cyan uppercase tracking-[3px] opacity-50">Context Engine</span>
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg">
+              <span class="text-[10px] font-black text-white">GEMINI</span>
+              <span class="w-[1px] h-3 bg-white/10"></span>
+              <span class="text-[9px] font-bold text-suta-cyan">2.0 Flash</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-[8px] font-bold text-suta-cyan uppercase tracking-[3px] opacity-50">Specialized</span>
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg">
+              <span class="text-[10px] font-black text-white">OPENROUTER</span>
+              <span class="w-[1px] h-3 bg-white/10"></span>
+              <span class="text-[9px] font-bold text-suta-cyan">GPT OSS 120B</span>
+            </div>
+          </div>
+        </div>
 
         <div class="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-500">
           <NuxtLink 

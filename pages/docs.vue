@@ -139,7 +139,30 @@
                   </div>
                   <div class="p-4 bg-white/[0.03] border border-white/10 rounded-xl">
                     <h5 class="text-xs font-bold text-white uppercase tracking-widest mb-2">Manual Mode</h5>
-                    <p class="text-[11px] text-white/50 leading-relaxed">Allows you to explicitly ask the AI questions. This is perfect for deep dives into specific technical topics that weren't explicitly mentioned in the live audio.</p>
+                    <p class="text-[11px] text-white/50 leading-relaxed">Allows you to explicitly ask the AI questions. This is perfect for deep dives into specific technical topics that weren't explicitly mentioned in the live audio. You can also switch models mid-conversation to get different perspectives.</p>
+                  </div>
+                </div>
+                <div class="mt-8 p-6 bg-suta-cyan/5 border border-suta-cyan/20 rounded-xl">
+                  <h4 class="text-suta-cyan text-xs font-bold uppercase tracking-widest mb-4">Neural Infrastructure v2.0</h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-[10px]">
+                    <div class="space-y-2">
+                      <span class="text-white font-bold border-b border-suta-cyan/30 pb-1 block">GROQ (Performance)</span>
+                      <p class="text-white/40 leading-relaxed">
+                        High-speed execution via <b>Llama 3.3 70B</b> and <b>Llama 3.1 8B</b>. Features experimental support for <b>Llama 4 Scout</b> and <b>Qwen 3 32B</b> for cutting-edge response synthesis.
+                      </p>
+                    </div>
+                    <div class="space-y-2">
+                      <span class="text-white font-bold border-b border-suta-cyan/30 pb-1 block">GEMINI (Intelligence)</span>
+                      <p class="text-white/40 leading-relaxed">
+                        Utilizing <b>Gemini 2.0 Flash</b> for high-fidelity context preservation. Best for deep technical discussions where continuity is critical.
+                      </p>
+                    </div>
+                    <div class="space-y-2">
+                      <span class="text-white font-bold border-b border-suta-cyan/30 pb-1 block">OPENROUTER (Flexibility)</span>
+                      <p class="text-white/40 leading-relaxed">
+                        Access to <b>GPT OSS 120B</b> and multi-provider Gemini endpoints. Offers the broadest reasoning capabilities for complex architectural queries.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -265,8 +288,8 @@
                 <p class="text-xs text-white/40 leading-relaxed">Switch between global languages for source capture. Suta's translator is enabled by default, converting foreign technical dialogue into your primary language in real-time to ensure seamless communication.</p>
               </div>
               <div class="space-y-4">
-                <h4 class="text-sm font-bold text-white uppercase tracking-widest">Model Selection</h4>
-                <p class="text-xs text-white/40 leading-relaxed">Toggle between Gemini 2.5 Flash for speed and OpenRouter models for specialized reasoning. Defaulting to OpenRouter provides a broader range of high-performance technical models.</p>
+                <h4 class="text-sm font-bold text-white uppercase tracking-widest">Model Architecture</h4>
+                <p class="text-xs text-white/40 leading-relaxed">Choose your neural engine based on the situation. <b>Groq</b> is recommended for real-time speed, <b>Gemini</b> for reliable reasoning, and <b>OpenRouter</b> for access to specialized open-weights models like GPT-OSS and Qwen. You can swap models instantly via the sub-menu in the AI Panel.</p>
               </div>
             </div>
 

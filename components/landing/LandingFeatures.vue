@@ -13,8 +13,8 @@
 <script setup lang="ts">
 const features = [
   {
-    title: 'AI Whisperer',
-    description: 'Multi-model intelligence providing context-aware answers synced to your professional profile.',
+    title: 'Triple-Engine AI',
+    description: 'Switch between Groq (Speed), Gemini (Context), and OpenRouter (Specialized) for peak tactical performance.',
     iconStyle: '[mask-image:url(/icons/ai.svg)] [mask-size:contain] [mask-repeat:no-repeat]'
   },
   {

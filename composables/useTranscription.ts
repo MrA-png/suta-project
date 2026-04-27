@@ -110,9 +110,99 @@ export const useTranscription = () => {
     socket = workletNode = sourceNode = audioContext = null
   }
 
+  let mediaRecorder: MediaRecorder | null = null
+  let audioChunks: Blob[] = []
+
+  const initGroqWhisper = async (stream: MediaStream) => {
+    const apiKey = config.groqApiKey
+    const audioTracks = stream.getAudioTracks()
+
+    if (!apiKey || audioTracks.length === 0) {
+      currentStatus.value = 'error'
+      return
+    }
+
+    currentStatus.value = 'listening'
+    isListening.value = true
+    
+    const mimeType = [
+      'audio/webm;codecs=opus',
+      'audio/ogg;codecs=opus',
+      'audio/webm',
+      'audio/mp4',
+      'audio/aac'
+    ].find(type => MediaRecorder.isTypeSupported(type))
+
+    const captureChunk = () => {
+      if (!isListening.value || !activeStream.value) return
+
+      const audioStream = new MediaStream(activeStream.value.getAudioTracks())
+      const recorder = new MediaRecorder(audioStream, mimeType ? { mimeType } : {})
+      const chunks: Blob[] = []
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data)
+      }
+
+      recorder.onstop = async () => {
+        if (chunks.length > 0) {
+          const blob = new Blob(chunks, { type: mimeType || 'audio/webm' })
+          await sendToGroq(blob)
+        }
+        // Start next chunk
+        if (isListening.value) captureChunk()
+      }
+
+      // Record for 3 seconds then stop to finalize the file
+      recorder.start()
+      setTimeout(() => {
+        if (recorder.state === 'recording') recorder.stop()
+      }, 3500)
+    }
+
+    captureChunk()
+  }
+
+  const sendToGroq = async (blob: Blob) => {
+    const apiKey = config.groqApiKey
+    const formData = new FormData()
+    formData.append('file', blob, 'audio.webm')
+    formData.append('model', 'whisper-large-v3-turbo')
+    formData.append('language', settings.value.sourceLang.split('-')[0])
+    formData.append('response_format', 'json')
+
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}` },
+        body: formData
+      })
+      const data = await response.json()
+      if (data.text?.trim()) {
+        addMessage('Speaker', data.text)
+        if (settings.value.isTranslatorEnabled) {
+          translateAuto(data.text).then(t => updateLastMessageTranslation(t))
+        }
+      }
+    } catch (err) {
+      console.error("Groq API Error:", err)
+    }
+  }
+
+  const stopGroqWhisper = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop()
+    }
+    mediaRecorder = null
+    isListening.value = false
+    currentStatus.value = 'idle'
+  }
+
   return {
     activeStream,
     initDeepgram,
-    stopDeepgram
+    stopDeepgram,
+    initGroqWhisper,
+    stopGroqWhisper
   }
 }

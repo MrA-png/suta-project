@@ -52,7 +52,7 @@ import { useTranscription } from '../../composables/useTranscription'
 import { useWorkspaceResizer } from '../../composables/useWorkspaceResizer'
 
 const { isStreaming, currentStatus, transcript, settings, clearTranscript } = useSuta()
-const { activeStream, initDeepgram, stopDeepgram } = useTranscription()
+const { activeStream, initDeepgram, stopDeepgram, initGroqWhisper, stopGroqWhisper } = useTranscription()
 const { terminalHeight, isResizing, startResizing } = useWorkspaceResizer()
 
 const displayRef = ref<any>(null)
@@ -84,7 +84,11 @@ const startCapture = async () => {
     if (displayRef.value?.videoElement) displayRef.value.videoElement.srcObject = stream
     stream.getVideoTracks()[0].onended = () => stopCapture()
     
-    await initDeepgram(stream)
+    if (settings.value.transcriptionEngine === 'groq-whisper') {
+      await initGroqWhisper(stream)
+    } else {
+      await initDeepgram(stream)
+    }
   } catch (err) {
     console.error("Capture failed:", err)
     isStreaming.value = false
@@ -97,7 +101,11 @@ const stopCapture = () => {
     clearTranscript(true)
   }
   
-  stopDeepgram()
+  if (settings.value.transcriptionEngine === 'groq-whisper') {
+    stopGroqWhisper()
+  } else {
+    stopDeepgram()
+  }
   
   if (displayRef.value?.videoElement) displayRef.value.videoElement.srcObject = null
   
@@ -113,10 +121,15 @@ const stopCapture = () => {
   currentStatus.value = 'idle'
 }
 
-watch(() => settings.value.sourceLang, () => {
+watch([() => settings.value.sourceLang, () => settings.value.transcriptionEngine], () => {
   if (isStreaming.value && activeStream.value) {
-    stopDeepgram()
-    initDeepgram(activeStream.value)
+    if (settings.value.transcriptionEngine === 'groq-whisper') {
+      stopDeepgram()
+      initGroqWhisper(activeStream.value)
+    } else {
+      stopGroqWhisper()
+      initDeepgram(activeStream.value)
+    }
   }
 })
 

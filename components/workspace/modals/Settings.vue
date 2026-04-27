@@ -2,6 +2,23 @@
   <UiBaseModal :show="show" title="SYSTEM SETTINGS" @close="$emit('close')">
     <div class="space-y-6 py-2">
       <!-- Language Selection -->
+      <!-- Transcription Engine -->
+      <div class="space-y-3">
+        <label class="text-[10px] font-bold text-suta-muted uppercase tracking-widest">Transcription Engine (Telinga)</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            v-for="engine in ['deepgram', 'groq-whisper']" 
+            :key="engine"
+            @click="settings.transcriptionEngine = engine as any"
+            class="px-4 py-3 rounded border text-[10px] font-bold uppercase transition-all"
+            :class="settings.transcriptionEngine === engine ? 'bg-suta-cyan/10 border-suta-cyan text-suta-cyan' : 'bg-white/5 border-white/10 text-suta-muted hover:border-white/30'"
+          >
+            {{ engine === 'deepgram' ? 'Deepgram (Fast)' : 'Groq Whisper (Turbo)' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Language Selection -->
       <div class="space-y-3">
         <label class="text-[10px] font-bold text-suta-muted uppercase tracking-widest">Interview Language (Source)</label>
         <div class="grid grid-cols-2 gap-2">

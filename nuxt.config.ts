@@ -5,7 +5,8 @@ export default defineNuxtConfig({
     public: {
       deepgramApiKey: process.env.DEEPGRAM_API_KEY,
       geminiApiKey: process.env.GEMINI_API_KEY,
-      openrouterApiKey: process.env.OPENROUTER_API_KEY
+      openrouterApiKey: process.env.OPENROUTER_API_KEY,
+      groqApiKey: process.env.GROQ_API_KEY
     }
   },
   app: {

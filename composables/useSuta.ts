@@ -18,6 +18,7 @@ export interface SutaSettings {
   sourceLang: string;
   targetLang: string;
   isTranslatorEnabled: boolean;
+  transcriptionEngine: 'deepgram' | 'groq-whisper';
 }
 
 export interface AIWhisper {
@@ -52,7 +53,8 @@ export const useSuta = () => {
   const settings = useState<SutaSettings>('suta-settings', () => ({
     sourceLang: 'en-US',
     targetLang: 'id',
-    isTranslatorEnabled: true
+    isTranslatorEnabled: true,
+    transcriptionEngine: 'groq-whisper'
   }))
 
   const personality = useState<Personality | null>('suta-personality', () => null)
