@@ -85,6 +85,69 @@
             </div>
           </section>
 
+          <section id="user-guide" class="mb-20 pt-10 border-t border-white/5">
+            <h2 class="text-3xl font-bold tracking-tight mb-8">User Operating Manual</h2>
+            <p class="text-white/60 leading-relaxed mb-8">
+              To achieve maximum efficiency during an interview or technical session, follow this standardized operating procedure. Suta is designed to be your silent partner, providing support without distraction.
+            </p>
+
+            <div class="space-y-12">
+              <!-- Step 1 -->
+              <div class="flex gap-6">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 flex items-center justify-center text-suta-cyan font-bold text-sm">1</div>
+                <div>
+                  <h4 class="text-lg font-bold mb-2">System Calibration</h4>
+                  <p class="text-sm text-white/50 leading-relaxed mb-4">
+                    Access the <b>System Settings</b> (Gear icon in the Terminal header) to configure your environment. Select your preferred <b>Transcription Engine</b>: Deepgram for low-latency live captions, or Groq Whisper for maximum linguistic precision.
+                  </p>
+                  <div class="flex gap-2 text-[9px] uppercase font-bold tracking-widest text-suta-cyan/60">
+                    <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10">STT Config</span>
+                    <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10">Language Pairs</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="flex gap-6">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 flex items-center justify-center text-suta-cyan font-bold text-sm">2</div>
+                <div>
+                  <h4 class="text-lg font-bold mb-2">Neural Identity Sync</h4>
+                  <p class="text-sm text-white/50 leading-relaxed mb-4">
+                    Open the <b>AI Help Panel</b> (Brain icon) and click <b>Neural Profile</b>. Inject your technical persona in JSON format. This step ensures that the AI "Whispers" are contextually aligned with your actual professional expertise.
+                  </p>
+                  <div class="p-3 rounded bg-black/40 border border-white/5 font-mono text-[10px] text-white/40">
+                    // Profile synced via AI Panel UI
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="flex gap-6">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 flex items-center justify-center text-suta-cyan font-bold text-sm">3</div>
+                <div>
+                  <h4 class="text-lg font-bold mb-2">The Intelligence Pipeline</h4>
+                  <p class="text-sm text-white/50 leading-relaxed mb-4">
+                    Choose your AI Brain (Gemini, Llama 3, etc.) and toggle <b>Auto Mode</b>. Suta monitors the transcript and triggers an analysis after <b>2 seconds of silence</b>. This "Debounce" logic prevents the AI from interrupting you while you're still speaking.
+                  </p>
+                  <div class="flex items-center gap-3 p-3 rounded-lg bg-suta-cyan/5 border border-suta-cyan/10 border-dashed">
+                    <div class="w-2 h-2 rounded-full bg-suta-cyan animate-pulse"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-suta-cyan">VAD Silence Detection Active</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="flex gap-6">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-suta-cyan/10 border border-suta-cyan/20 flex items-center justify-center text-suta-cyan font-bold text-sm">4</div>
+                <div>
+                  <h4 class="text-lg font-bold mb-2">Session Governance</h4>
+                  <p class="text-sm text-white/50 leading-relaxed mb-4">
+                    Maintain control over your resources. Click the <b>Resource Monitor</b> icon in the Terminal header to track real-time token usage, requests, and estimated session costs for both transcription and AI synthesis.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
           <section id="overview" class="mb-20 pt-10 border-t border-white/5">
             <h2 class="text-3xl font-bold tracking-tight mb-8">Protocol Overview</h2>
             <p class="text-white/60 leading-relaxed mb-8">
@@ -366,9 +429,10 @@ const highlightedJson = computed(() => {
 
 const navSections = [
   {
-    title: 'Introduction',
+    title: 'Operating Guide',
     links: [
       { text: 'Getting Started', id: 'getting-started' },
+      { text: 'Operating Manual', id: 'user-guide' },
       { text: 'Protocol Overview', id: 'overview' }
     ]
   },

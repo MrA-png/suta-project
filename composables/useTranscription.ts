@@ -151,58 +151,65 @@ export const useTranscription = () => {
     const SILENCE_THRESHOLD = 15 // Adjust based on testing
     const SILENCE_DURATION = 1500 // 1.5 seconds of silence to trigger stop
 
+    const audioOnlyStream = new MediaStream(stream.getAudioTracks())
+
     const captureChunk = () => {
-      if (!isListening.value || !activeStream.value) {
-        audioCtx.close()
+      if (!isListening.value || !activeStream.value || !activeStream.value.active) {
+        if (audioCtx.state !== 'closed') audioCtx.close()
         return
       }
 
-      const recorder = new MediaRecorder(activeStream.value, mimeType ? { mimeType } : {})
-      const chunks: Blob[] = []
+      try {
+        const recorder = new MediaRecorder(audioOnlyStream, mimeType ? { mimeType } : {})
+        const chunks: Blob[] = []
+        const startTime = Date.now()
 
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data)
-      }
-
-      recorder.onstop = async () => {
-        if (chunks.length > 0) {
-          const blob = new Blob(chunks, { type: mimeType || 'audio/webm' })
-          await sendToGroq(blob)
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunks.push(e.data)
         }
-        if (isListening.value) captureChunk()
-      }
 
-      recorder.start()
+        recorder.onstop = async () => {
+          if (chunks.length > 0) {
+            const blob = new Blob(chunks, { type: mimeType || 'audio/webm' })
+            await sendToGroq(blob)
+          }
+          if (isListening.value) setTimeout(captureChunk, 100)
+        }
 
-      const checkSilence = () => {
-        if (recorder.state !== 'recording') return
+        recorder.start()
 
-        analyser.getByteFrequencyData(dataArray)
-        const volume = dataArray.reduce((a, b) => a + b) / dataArray.length
+        const checkSilence = () => {
+          if (recorder.state !== 'recording') return
 
-        if (volume < SILENCE_THRESHOLD) {
-          if (silenceStart === 0) silenceStart = Date.now()
-          if (Date.now() - silenceStart > SILENCE_DURATION) {
-            recorder.stop()
+          analyser.getByteFrequencyData(dataArray)
+          const volume = dataArray.reduce((a, b) => a + b) / dataArray.length
+
+          if (volume < SILENCE_THRESHOLD) {
+            if (silenceStart === 0) silenceStart = Date.now()
+            if (Date.now() - silenceStart > SILENCE_DURATION) {
+              recorder.stop()
+              silenceStart = 0
+              return
+            }
+          } else {
             silenceStart = 0
+          }
+
+          // Also stop if recording exceeds 15 seconds to prevent too large files
+          const recordingDuration = Date.now() - startTime
+          if (recordingDuration > 15000) {
+            recorder.stop()
             return
           }
-        } else {
-          silenceStart = 0
+
+          requestAnimationFrame(checkSilence)
         }
 
-        // Also stop if recording exceeds 15 seconds to prevent too large files
-        const recordingDuration = Date.now() - (recorder as any)._startTime
-        if (recordingDuration > 15000) {
-          recorder.stop()
-          return
-        }
-
-        requestAnimationFrame(checkSilence)
+        checkSilence()
+      } catch (e) {
+        console.error("MediaRecorder initialization failed:", e)
+        currentStatus.value = 'error'
       }
-
-      (recorder as any)._startTime = Date.now()
-      checkSilence()
     }
 
     captureChunk()
