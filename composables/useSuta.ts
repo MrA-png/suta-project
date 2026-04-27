@@ -54,7 +54,7 @@ export const useSuta = () => {
     sourceLang: 'en-US',
     targetLang: 'id',
     isTranslatorEnabled: true,
-    transcriptionEngine: 'groq-whisper'
+    transcriptionEngine: 'deepgram'
   }))
 
   const personality = useState<Personality | null>('suta-personality', () => null)
