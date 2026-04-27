@@ -8,6 +8,14 @@ export default defineNuxtConfig({
       openrouterApiKey: process.env.OPENROUTER_API_KEY
     }
   },
+  app: {
+    head: {
+      title: 'Suta | AI Secret Whisperer',
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/favicon.png' }
+      ]
+    }
+  },
   modules: [
     '@nuxtjs/tailwindcss'
   ],
