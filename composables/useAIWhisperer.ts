@@ -10,9 +10,11 @@ export const useAIWhisperer = () => {
   const geminiModel = ref('gemini-2.0-flash')
   const openRouterModel = ref('openai/gpt-oss-120b:free')
   const pendingManualQuery = ref('')
+  const pendingContext = ref('')
 
   const SUTA_WHISPERER_PROMPT = computed(() => {
-    const targetLanguageName = settings.value.targetLang === 'id' ? 'Indonesian' : 'English'
+    const isIndonesian = settings.value.sourceLang.startsWith('id')
+    const responseLanguage = isIndonesian ? 'Indonesian' : 'English'
     
     return `
 You are the "SECRET WHISPERER", a personal job interview assistant acting as a "source person" or "coach" to help the user answer interview questions.
@@ -22,7 +24,7 @@ ${JSON.stringify(personality.value, null, 2)}
 
 Your Personality & Tone:
 1. TONE: Human-pro, conversational, and "one-take ready". Imagine a senior developer speaking naturally in an interview.
-2. LANGUAGE: You MUST respond in ${targetLanguageName}. Use natural phrasing (Indonesian: "Sebenarnya...", "Kalau dari sisi...", "Jadi gini...").
+2. LANGUAGE: You MUST respond in ${responseLanguage}. Use natural phrasing (Indonesian: "Sebenarnya...", "Kalau dari sisi...", "Jadi gini...").
 3. PERSONA: You ARE the candidate. Speak in the first person ("I" or "Saya").
 4. BE CONCISE: Complete, but compact. 2-4 sentences max per whisper. High impact, zero fluff.
 5. NO AI-FORMATTING: NEVER use bullet points or numbered lists in the SUGGESTED_WHISPER. Write in natural paragraphs.
@@ -46,18 +48,23 @@ OUTPUT STRUCTURE:
     if (transcript.value.length < 1 && !customQuery) return
 
     isAnalyzing.value = true
-    if (customQuery) {
-      pendingManualQuery.value = customQuery
+    
+    const allMessages = transcript.value
+    const newMessages = customQuery ? [] : allMessages.slice(lastProcessedIdx.value)
+    
+    const context = customQuery 
+      ? customQuery 
+      : newMessages.filter(m => m.speaker !== 'System').map(m => m.text).join(' ')
+
+    if (!context) {
+      isAnalyzing.value = false
+      return
     }
 
+    pendingContext.value = context
+    if (customQuery) pendingManualQuery.value = customQuery
+
     try {
-      const allMessages = transcript.value
-      const newMessages = customQuery ? [] : allMessages.slice(lastProcessedIdx.value)
-      
-      if (!customQuery && newMessages.length === 0) {
-        isAnalyzing.value = false
-        return
-      }
 
       const currentContext = allMessages.map((m: any) => `[${m.speaker}]: ${m.text}`).join('\n')
       const triggeringContext = newMessages.map(m => m.text).join(' ')
@@ -120,9 +127,11 @@ OUTPUT STRUCTURE:
       }
 
       pendingManualQuery.value = ''
+      pendingContext.value = ''
     } catch (err) {
       console.error('AI Analysis Error:', err)
       pendingManualQuery.value = ''
+      pendingContext.value = ''
     } finally {
       isAnalyzing.value = false
     }
@@ -139,6 +148,7 @@ OUTPUT STRUCTURE:
     isAnalyzing,
     activeModel,
     pendingManualQuery,
+    pendingContext,
     performAIAnalysis,
     formatAIResponse
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full bg-suta-dark-gray border-t border-suta-border flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500">
+  <div class="h-full bg-suta-dark-gray border-t border-suta-border flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500 select-text cursor-default">
     <!-- Header -->
     <div 
       ref="headerRef"
@@ -82,11 +82,11 @@
           :whisper="item"
         />
 
-        <!-- Pending Manual Query -->
-        <div v-if="isAnalyzing && pendingManualQuery" class="animate-in fade-in slide-in-from-top-1 duration-300 mb-6">
+        <!-- Pending Context Bubble (Manual or Auto) -->
+        <div v-if="isAnalyzing && pendingContext" class="animate-in fade-in slide-in-from-top-1 duration-300 mb-6">
           <div class="flex justify-end">
             <div class="max-w-[85%] px-3 py-2 rounded-2xl bg-suta-cyan/10 border border-suta-cyan/20 text-white text-[12px] font-medium shadow-lg shadow-suta-cyan/5">
-              {{ pendingManualQuery }}
+              {{ pendingContext }}
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@ import { useSuta } from '../../composables/useSuta'
 import { useAIWhisperer } from '../../composables/useAIWhisperer'
 
 const { transcript, interimText, isAIPanelOpen, isStreaming, personality, aiWhispers } = useSuta()
-const { isAnalyzing, activeModel, pendingManualQuery, performAIAnalysis, formatAIResponse } = useAIWhisperer()
+const { isAnalyzing, activeModel, pendingManualQuery, pendingContext, performAIAnalysis, formatAIResponse } = useAIWhisperer()
 
 const isPersonalityModalOpen = ref(false)
 const isAutoMode = ref(true)
@@ -163,15 +163,6 @@ const syncPersonality = () => {
 }
 
 // Auto-Analysis Orchestration
-let autoWhisperTimeout: any = null
-
-watch(interimText, (newVal) => {
-  if (newVal && autoWhisperTimeout) {
-    clearTimeout(autoWhisperTimeout)
-    autoWhisperTimeout = null
-  }
-})
-
 watch(transcript, (newVal) => {
   if (!isStreaming.value || !isAutoMode.value || isAnalyzing.value) return
   
@@ -180,8 +171,7 @@ watch(transcript, (newVal) => {
     const hasRealContent = newVal.slice(lastProcessedIdx.value).some(m => m.speaker !== 'System')
     
     if (hasRealContent && !interimText.value) {
-      clearTimeout(autoWhisperTimeout)
-      autoWhisperTimeout = setTimeout(() => performAIAnalysis(), 2000)
+      performAIAnalysis()
     }
   }
 }, { deep: true })
@@ -218,7 +208,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (resizeObserver) resizeObserver.disconnect()
-  if (autoWhisperTimeout) clearTimeout(autoWhisperTimeout)
 })
 </script>
 
