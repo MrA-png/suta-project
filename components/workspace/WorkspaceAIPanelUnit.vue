@@ -94,7 +94,7 @@
       <div class="sticky top-0 z-30 flex items-center justify-between p-2 pb-2 bg-black/60 backdrop-blur-xl border-b border-white/5">
         <button 
           v-if="aiWhispers.length > 0"
-          @click="aiWhispers = []"
+          @click="showClearConfirm = true"
           class="text-[8px] font-bold text-red-400/40 hover:text-red-400 uppercase tracking-widest transition-all"
         >
           [ Clear ]
@@ -177,6 +177,16 @@
     <!-- Guide & Modals -->
     <WorkspaceModalsPersonality :show="isPersonalityModalOpen" @close="isPersonalityModalOpen = false" />
     <WorkspaceGuide />
+    <UiBaseConfirmation 
+      :show="showClearConfirm"
+      title="CLEAR WHISPER HISTORY?"
+      message="Are you sure you want to delete all current AI whispers?"
+      sub-message="This action cannot be undone and will clear the current session's AI suggestions."
+      confirm-text="Clear History"
+      danger
+      @cancel="showClearConfirm = false"
+      @confirm="handleConfirmClear"
+    />
   </div>
 </template>
 
@@ -205,7 +215,13 @@ const isPersonalityModalOpen = ref(false)
 const isAutoMode = ref(true)
 const manualInput = ref('')
 const isSyncing = ref(false)
+const showClearConfirm = ref(false)
 const scrollContainer = ref<HTMLElement | null>(null)
+
+const handleConfirmClear = () => {
+  aiWhispers.value = []
+  showClearConfirm.value = false
+}
 
 const syncPersonality = () => {
   if (isSyncing.value) return

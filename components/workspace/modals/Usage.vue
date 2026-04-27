@@ -61,7 +61,7 @@
 
         <div class="pt-4 flex flex-col items-center gap-3 border-t border-white/5">
           <button 
-            @click="resetUsage"
+            @click="showResetConfirm = true"
             class="text-[9px] font-bold text-red-400/50 hover:text-red-400 uppercase tracking-widest transition-all"
           >
             [ Reset Session Data ]
@@ -70,17 +70,33 @@
         </div>
       </div>
     </div>
+    <UiBaseConfirmation 
+      :show="showResetConfirm"
+      title="RESET USAGE LOGS?"
+      message="Are you sure you want to clear all session statistics?"
+      sub-message="This will reset all token counts and estimated costs for the current session."
+      confirm-text="Reset Logs"
+      danger
+      @cancel="showResetConfirm = false"
+      @confirm="handleConfirmReset"
+    />
   </UiBaseModal>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useUsage } from '~/composables/useUsage'
 
 defineProps<{ show: boolean }>()
 defineEmits(['close'])
 
 const { stats, resetUsage } = useUsage()
+const showResetConfirm = ref(false)
+
+const handleConfirmReset = () => {
+  resetUsage()
+  showResetConfirm.value = false
+}
 
 const aiModelsUsage = computed(() => {
   return {
