@@ -76,7 +76,7 @@
 
       <!-- Chat Flow -->
       <div v-if="aiWhispers.length > 0 || isAnalyzing || (isAutoMode && isStreaming)" class="p-6 pt-2 pb-20">
-        <AIPanelWhisperCard 
+        <WorkspaceAIPanelWhisperCard 
           v-for="(item, idx) in aiWhispers" 
           :key="idx"
           :whisper="item"
@@ -104,7 +104,7 @@
         </div>
 
         <!-- Live Real-time Monitor -->
-        <AIPanelMonitor 
+        <WorkspaceAIPanelMonitor 
           v-if="isAutoMode && isStreaming && !isAnalyzing" 
           :interim-text="interimText"
         />

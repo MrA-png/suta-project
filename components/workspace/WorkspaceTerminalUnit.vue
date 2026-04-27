@@ -64,7 +64,7 @@
           :target-lang="settings.targetLang"
         />
 
-        <TerminalLiveCaption :text="interimText" />
+        <WorkspaceTerminalLiveCaption :text="interimText" />
       </div>
     </div>
 
