@@ -18,9 +18,10 @@ Thanks to its fully customizable **Neural Personality Engine**, Suta is a versat
 AI serves as the "neural core" of Suta, transforming live audio into actionable intelligence. The system utilizes a sophisticated multi-model pipeline to ensure sub-second response times:
 
 1.  **Low-Latency Transcription**: Utilizing **Deepgram’s Nova-2** model, Suta achieves sub-second audio-to-text conversion, ensuring the AI captures every nuance of the live conversation.
-2.  **Strategic Reasoning**: Users can toggle between two high-performance models depending on the need:
-    *   **Gemini 2.0 Flash**: Optimized for extreme speed and efficiency in real-time response generation.
-    *   **OpenRouter (openai/gpt-oss-120b:free)**: Leveraged for deep reasoning and processing complex technical queries.
+2.  **Strategic Reasoning (Stealth & Ultra-Low Latency)**: In high-stakes sessions, speed is the ultimate leverage. Suta utilizes a high-speed neural pipeline to deliver tactical "whispers" in sub-second cycles:
+    *   **Groq LPU™ Integration**: Optimized for extreme speed, leveraging Llama 3.3 70B for near-instantaneous response generation.
+    *   **Gemini 2.0 Flash**: High-fidelity reasoning with large context windows for deep technical continuity.
+    *   **OpenRouter**: Access to a broad spectrum of open-weights models like GPT-OSS and Qwen for specialized queries.
 3.  **Specialized Bilingual Synthesis**: The AI cross-references live dialogue with the user’s custom **JSON Personality Profile** to provide accurate whispers that are "one-take ready." Upon detecting 2 seconds of silence, Suta delivers paragraph-style responses in English or Indonesian, allowing users to remain composed and articulate without manual editing.
 
 **Suta serves as your secret tactical advantage, whispering expert-level insights directly to your screen so you can navigate any high-stakes conversation with unshakeable confidence and perfect technical precision.**
@@ -32,7 +33,7 @@ AI serves as the "neural core" of Suta, transforming live audio into actionable 
 - **Frontend**: [Nuxt 3](https://nuxt.com/) (Vue.js)
 - **Styling**: Vanilla CSS & TailwindCSS (for utility layout)
 - **Transcription**: [Deepgram Nova-2](https://deepgram.com/)
-- **AI Models**: Google Gemini 2.0 Flash & OpenRouter API
+- **AI Models**: Groq LPU™ (Llama 3.3), Google Gemini 2.0 & OpenRouter
 - **Icons**: Custom SVG System
 - **State Management**: Nuxt `useState` & LocalStorage
 
@@ -41,7 +42,7 @@ AI serves as the "neural core" of Suta, transforming live audio into actionable 
 ### Prerequisites
 
 - Node.js (v18.x or later)
-- API Keys for Deepgram, Google Gemini, and OpenRouter
+- API Keys for Deepgram, Groq, Google Gemini, and OpenRouter
 
 ### Installation
 
@@ -64,6 +65,9 @@ AI serves as the "neural core" of Suta, transforming live audio into actionable 
    ```env
    # Deepgram: https://console.deepgram.com/
    DEEPGRAM_API_KEY=your_deepgram_key
+
+   # Groq: https://console.groq.com/
+   GROQ_API_KEY=your_groq_key
 
    # Google AI Studio: https://aistudio.google.com/
    GEMINI_API_KEY=your_gemini_key
